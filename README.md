@@ -8,4 +8,4 @@ If you are a student for self study, I suggest you should have some practical ex
 
 If you are a student for Computer Science, you can study and fellow this respository at once.
 
-I have worked for a year, and now can partially understand the open course. So I begin to take some notes for improvement.
+I have worked for a year, and now can partially understand the open course. So I decide to take some notes for improvement.
