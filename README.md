@@ -11,3 +11,7 @@ If you are a student for Computer Science, you can study and fellow this resposi
 I have worked for a year, and now can partially understand the open course. So I decide to take some notes for improvement.
 
 The videos of Introduction to Algorithm have been updated. Please visit:[Introduction to Algorithm 2011](https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-006-introduction-to-algorithms-fall-2011/index.htm)
+
+Reference book:
+
+Algorithm 4th Edition. It could be easier understanding than Introduction to Algorithm.
