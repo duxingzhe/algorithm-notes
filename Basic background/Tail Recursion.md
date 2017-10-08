@@ -25,7 +25,7 @@ About the recursion and tail recursion:
 
 Definition:
 
-Function for itself is recursion. When the recursion is at the end of the function, it is called tail recursion.
+Function called for itself is recursion. When the recursion is at the end of the function, it is definited as tail recursion.
 
 As we know, recursion occupied so much memory, which leads the error of stack overflow. Tail recursion, however, has only one recursion call. The error of stack overflow will never happen.
 
