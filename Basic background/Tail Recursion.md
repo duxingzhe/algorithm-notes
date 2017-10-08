@@ -48,4 +48,4 @@ If we change to tail recursion, we only store one record of call in memory, whos
 
     factorial(5, 1) // 120
 
-Therefore, the optimization of tail recursion plays a significant role in the operation of recursion. In some functional programming language, it becomes as the standard. So is ES6. At first time, it regulate the realization of ECMAscript should deploy the optimzation of tail recursion. Put another way, once we use tail recursion in ES6, never did we encounter the problem of stack overflow to save the usage of the memory.
+Therefore, the optimization of tail recursion plays a significant role in the operation of recursion. In some functional programming language, it becomes the standard. So is ES6. At first time, the tail recursion are regulated. The realization of ECMAscript should deploy the optimzation of tail recursion. Put another way, once we use tail recursion in ES6, never did we encounter the problem of stack overflow. We save the usage of the memory.
