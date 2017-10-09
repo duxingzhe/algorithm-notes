@@ -48,4 +48,43 @@ If we change to tail recursion, we only store one record of call in memory, whos
 
     factorial(5, 1) // 120
 
-Therefore, the optimization of tail recursion plays a significant role in the operation of recursion. In some functional programming language, it becomes the standard. So is ES6. At first time, the tail recursion are regulated. The realization of ECMAscript should deploy the optimzation of tail recursion. Put another way, once we use tail recursion in ES6, never did we encounter the problem of stack overflow. We save the usage of the memory.
+Therefore, the optimization of tail recursion plays a significant role in the operation of recursion. In some functional programming language, it becomes the standard. So is ES6. At first time, the tail recursion is regulated. The realization of ECMAscript should deploy the optimization of tail recursion. Put another way, once we use tail recursion in ES6, never did we encounter the problem of stack overflow. We save the usage of the memory.
+
+The tail recursion will rewrite the recursion function to ensure that we can call for itself. To achieve this goal, we need to change the internal variable into the parameter of function. As mentioned above, factorial function factorial needs a variable total, so we need to change it into a parameter of function. The disadvantages is that it dosen't directly call when we use it. Then we may ask, "Why when we count the factorial of 5, we need to set two parameter as 5 and 1 respectively?
+
+There are two methods to deal with it. One is offering a normal function which is out side of tail recursion.
+
+    function tailFactorial(n, total) {
+      if (n === 1) return total;
+      return tailFactorial(n - 1, n * total);
+    }
+
+    function factorial(n) {
+      return tailFactorial(n, 1);
+    }
+
+    factorial(5) // 120
+
+After calling for tailFactorial function, it looks better than normal factorial function.
+
+There is a concept called currying in functional programming, which is convert the function of multi parameters into single parameter. Therefore, we can use currying here.
+
+
+    function currying(fn, n) {
+      return function (m) {
+        return fn.call(this, m, n);
+      };
+    }
+
+    function tailFactorial(n, total) {
+      if (n === 1) return total;
+      return tailFactorial(n - 1, n * total);
+    }
+
+    const factorial = currying(tailFactorial, 1);
+
+    factorial(5) // 120
+
+After currying, tail recursion tailFactorial become a function of single parameter factorial.
+
+To summarize, recursion is a kind operation of loop. There is no loop gramma in functional programming language and all the loops are taken place by recursion. That's why tail recursion plays a significant role in these languages. In the language which support the tail recursion, such as Lua, ES6, we can use recursion. Instead of loop, we had better use recursion and the tail recursion is recommanded.
