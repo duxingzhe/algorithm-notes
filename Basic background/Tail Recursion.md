@@ -52,7 +52,7 @@ Therefore, the optimization of tail recursion plays a significant role in the op
 
 The tail recursion will rewrite the recursion function to ensure that we can call for itself. To achieve this goal, we need to change the internal variable into the parameter of function. As mentioned above, factorial function factorial needs a variable total, so we need to change it into a parameter of function. The disadvantages is that it dosen't directly call when we use it. Then we may ask, "Why when we count the factorial of 5, we need to set two parameter as 5 and 1 respectively?
 
-There are two methods to deal with it. One is offering a normal function which is out side of tail recursion.
+Offering a normal function which is out side of tail recursion will solve this problem.
 
     function tailFactorial(n, total) {
       if (n === 1) return total;
