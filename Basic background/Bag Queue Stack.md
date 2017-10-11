@@ -259,3 +259,9 @@ public class Stack<Item> {
     }
 }
 ```
+
+| data structure  |        advantage     | disadvantage  |
+| :-------------: |:--------------------:| :------------:|
+| array           | index provides immediate access to any item | need to know size on initialization |
+| linked list     | uses space proportional to size |  need reference to access an item |
+Fundamental data structures
