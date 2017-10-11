@@ -44,3 +44,5 @@ In ChAPter 6 (but not until then!) we will consider programs whose running times
 We need to try to prevent from exponential time.
 
 From now on, I know the differences between *Algorithm* and *Introduction to Algorithm*. Algorithm is easier for the beginners, but *Introduction to Algorithm* pays attention to the analysis of algorithm, which can be harder.
+
+I will discuss further in future study.
