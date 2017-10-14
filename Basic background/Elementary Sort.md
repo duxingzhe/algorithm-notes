@@ -147,3 +147,9 @@ public class Insertion {
     }
 }
 ```
+
+#### Property E
+
+The number of compares used by shellsort with the increments 1, 4,
+13, 40, 121, 364, . . . is bounded by a small multiple of N times the number of increments
+used.
