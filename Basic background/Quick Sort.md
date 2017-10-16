@@ -76,11 +76,11 @@ Experienced programmers also know to take special care to ensure that any recurs
 
 #### Proposition K
 
-Quicksort uses ~ 2N ln N compares (and one-sixth that many exchanges) on the average to sort an array of length N with distinct keys.
+Quicksort uses ~ 2Nln N compares (and one-sixth that many exchanges) on the average to sort an array of length N with distinct keys.
 
 #### Proposition L
 
-Quicksort uses ~ N 2/2 compares in the worst case, but random shuffling protects against this case.
+Quicksort uses ~ ![](http://latex.codecogs.com/gif.latex?\frac{n^2}/{2}) compares in the worst case, but random shuffling protects against this case.
 
 #### Algorithm Improvement
 
@@ -133,4 +133,4 @@ the frequencies of key values.
 
 #### Proposition N
 
-Quicksort with 3-way partitioning uses ~ (2ln 2) N H compares to sort N items, where H is the Shannon entropy, defined from the frequencies of key values.
+Quicksort with 3-way partitioning uses ~ (2ln2) N H compares to sort N items, where H is the Shannon entropy, defined from the frequencies of key values.
