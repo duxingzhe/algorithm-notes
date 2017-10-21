@@ -137,3 +137,69 @@ We add the new key at the end of the array, increment the size of the heap, and 
 ###### Remove the maximum
 
 We take the largest key off the top, put the item from the end of the heap at the top, decrement the size of the heap, and then sink down through the heap with that key to restore the heap condition.
+
+```
+public class MaxPQ<Key extends Comparable<Key>> {
+    
+    private Key[] pq;
+    private int N=0;
+    
+    public MaxPQ(int maxN){
+        pq=(Key[])new Comparable[maxN+1];
+    }
+    
+    public boolean isEmpty(){
+        return N==0;
+    }
+    
+    public int size(){
+        return N;
+    }
+    
+    public void insert(Key v){
+        pq[++N]=v;
+        swim(N);
+    }
+    
+    public Key delMax(){
+        Key max=pq[1];
+        exch(1,N--);
+        sink(1);
+        return max;
+    }
+
+    //See pages 145-147 for implementations of these helper methods.
+    private boolean less(int i,int j);
+    private void exch(int i,int j);
+    private void swim(int k);
+    private void sink(int k);
+}
+```
+
+##### Proposition Q
+
+In an N-key priority queue, the heap algorithms require no more than ![](http://latex.codecogs.com/gif.latex?1+logN)compares for insert and no more than ![](http://latex.codecogs.com/gif.latex?2logN) compares for remove the maximum.
+
+##### Multiway heaps
+
+It is not difficult to modify our code to build heaps based on an array representation of complete heap-ordered ternary trees, with an entry at position k larger than or equal to entries at positions 3k-1, 3k, and 3k+1 and smaller than or equal to entries at position ![](http://latex.codecogs.com/gif.latex?\lfloor(\frac{k+1}/{3})\rfloor), for all indices between 1 and N in an array of N items, and not much more difficult to use d-ary heaps for any given d. There is a tradeoff between the lower cost from the reduced tree height ![](http://latex.codecogs.com/gif.latex?log_{b}N) and the higher cost of finding the largest of the d children at each node. This tradeoff is dependent on details of the implementation and the expected relative frequency of operations.
+
+##### Array resizing
+
+We can add a no-argument constructor, code for array doubling in insert(), and code for array halving in delMax(), just as we did for stacks in Section 1.3. Thus, clients need not be concerned about arbitrary size restrictions. The logarithmic time bounds implied by PROPOSITION Q are amortized when the size of the priority queue is arbitrary and the arrays are resized.
+
+##### Immutability of keys
+
+The priority queue contains objects that are created by clients but assumes that client code does not change the keys (which might invalidate the heap-order invariant). It is possible to develop mechanisms to enforce this assumption, but programmers typically do not do so because they complicate the code and are likely to degrade performance.
+
+##### Index priority queue
+
+In many applications, it makes sense to allow clients to refer to items that are already on the priority queue. One easy way to do so is to associate a unique integer index with each item. Moreover, it is often the case that clients have a universe of items of a known size N and perhaps are using (parallel) arrays to store information about the items, so other unrelated client code might already be using an integer index to refer to items.
+
+##### Proposition Q (continued)
+
+In an index priority queue of size N, the number of compares required is proportional to at most ![](http://latex.codecogs.com/gif.latex?logN) for insert, change priority, delete, and remove the minimum.
+
+##### Index priority-queue client
+
+The IndexMinPQ client Multiway on page 322 solves the multiway merge problem: it merges together several sorted input streams into one sorted output stream.
