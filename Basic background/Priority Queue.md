@@ -203,3 +203,64 @@ In an index priority queue of size N, the number of compares required is proport
 ##### Index priority-queue client
 
 The IndexMinPQ client Multiway on page 322 solves the multiway merge problem: it merges together several sorted input streams into one sorted output stream.
+
+```
+public class Multiway {
+
+    public static void merge(In[] streams){
+        int N=streams.length;
+        IndexMinPQ<String> pq=new IndexMinPQ<String>(N);
+        
+        for(int i=0;i<N;i++){
+            if(!streams[i].isEmpty())
+                pq.insert(i,streams[i].readString());
+        }
+        
+        while(!pq.isEmpty()){
+            StdOut.println(pq.min());
+            int i=pq.delMin();
+            if(!streams[i].isEmpty()){
+                pq.insert(i,streams[i].readString());
+            }
+        }
+    }
+}
+```
+
+#### Heapsort
+
+Heapsort breaks into two phases: heap construction, where we reorganize the original array into a heap, and the sortdown, where we pull the items out of the heap in decreasing order to build the sorted result. For consistency with the code we have studied, we use a maximum-oriented priority queue and repeatedly remove the maximum. Focusing on the task of sorting, we abandon the notion of hiding the representation of the priority queue and use swim() and sink() directly. Doing so allows us to sort an array without needing any extra space, by maintaining the heap within the array to be sorted.
+
+##### Heap construction
+
+As the first phase of a sort, heap construction is a bit counterintuitive, because its goal is to produce a
+heap-ordered result, which has the largest item first in the array (and other larger items near the beginning), not at the end, where it is destined to finish.
+
+#### Proposition R
+
+Sink-based heap construction uses fewer than 2N compares and fewer than N exchanges to construct a heap from N items.
+
+```
+public static void sort(Comparable[] a){
+    int N=a.length;
+    for(int k=N/2;k>=1;k--){
+        sink(a,k,N);
+    }
+    while(N>1){
+        exch(a,1,N--);
+        sink(a,1,N);
+    }
+}
+```
+
+#### Sortdown
+
+Most of the work during heapsort is done during the second phase, where we remove the largest remaining item from the heap and put it into the array position vacated as the heap shrinks. This process is a bit like selection sort (taking the items in decreasing order instead of in increasing order), but it uses many fewer compares because the heap provides a much more efficient way to find the largest item in the unsorted part of the array.
+
+#### Proposition S
+
+Heapsort uses fewer than ![](http://latex.codecogs.com/gif.latex?2NlgN+2N) compares (and half that many exchanges) to sort N items.
+
+#### Sink to the bottom, then swim
+
+Most items reinserted into the heap during sortdown go all the way to the bottom. Floyd observed in 1964 that we can thus save time by avoiding the check for whether the item has reached its position, simply promoting the larger of the two children until the bottom is reached, then moving back up the heap to the proper position. This idea cuts the number of compares by a factor of 2 asymptotically—close to the number used by mergesort (for a randomly-ordered array). The method requires extra bookkeeping, and it is useful in practice only when the cost of compares is relatively high (for example, when we are sorting items with strings or other types of long keys).
