@@ -70,7 +70,7 @@ not null).
 ```
 import java.util.Comparator;
 
-public class Quick3way {
+public class Transaction {
 
     private final String who;
     private final Date when;
