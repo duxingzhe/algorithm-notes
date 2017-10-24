@@ -50,6 +50,7 @@ find: O(N)
 union: O(N) (worse case)
 
 Quick find
+
 ```
 public int find(int p){
     return id[p];
@@ -68,6 +69,7 @@ public void union(int p, int q){
 ```
 
 Quick union
+
 ```
 public int find(int p){
     return id[p];

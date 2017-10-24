@@ -39,7 +39,7 @@ A typical program whose running time has order of growth N 2 has two nested for 
 
 *Exponential*
 
-In ChAPter 6 (but not until then!) we will consider programs whose running times are proportional to ![](http://latex.codecogs.com/gif.latex?2^n) or higher. Generally, we use the term exponential to refer to algorithms whose order of growth is ![](http://latex.codecogs.com/gif.latex?b^n) for any constant b > 1, even though different values of b lead to vastly different running times. Exponential algorithms are extremely slow — you will never run one of them to completion for a large problem. Still, exponential algorithms play a critical role in the theory of algorithms because there exists a large class of problems for which it seems that an exponential algorithm is the best possible choice. 
+In Chapter 6 (but not until then!) we will consider programs whose running times are proportional to ![](http://latex.codecogs.com/gif.latex?2^n) or higher. Generally, we use the term exponential to refer to algorithms whose order of growth is ![](http://latex.codecogs.com/gif.latex?b^n) for any constant b > 1, even though different values of b lead to vastly different running times. Exponential algorithms are extremely slow — you will never run one of them to completion for a large problem. Still, exponential algorithms play a critical role in the theory of algorithms because there exists a large class of problems for which it seems that an exponential algorithm is the best possible choice. 
 
 We need to try to prevent from exponential time.
 

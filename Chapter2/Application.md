@@ -101,3 +101,90 @@ public class Transaction {
 ##### Stability
 
 A sorting method is stable if it preserves the relative order of equal keys in the array.
+
+#### Which sorting algorithm should I use?
+
+<table>
+    <tr>
+        <th rowspan="2">Client</th>
+        <th rowspan="2">stable?</th>
+        <th rowspan="2">in place?</th>
+        <th colspan="2">order of growth to sort N items</th>
+        <th >notes</th>
+    </tr>
+    <tr>
+        <th>time</th>
+        <th>space</th>
+    </tr>
+    <tr>
+        <th>selection sort</th>
+        <th>no</th>
+        <th>yes</th>
+        <th><img src="http://latex.codecogs.com/gif.latex?NlogN"></th>
+        <th>1</th>
+        <th rowspan="3">depends on order items</th>
+    </tr>
+    <tr>
+        <th>insertion sort</th>
+        <th>yes</th>
+        <th>yes</th>
+        <th>between N and <img src="http://latex.codecogs.com/gif.latex?N^2"></th>
+        <th>1</th>
+    </tr>
+    <tr>
+        <th>shellsort</th>
+        <th>no</th>
+        <th>yes</th>
+        <th>
+        <img src="http://latex.codecogs.com/gif.latex?NlogN">?
+        <img src="http://latex.codecogs.com/gif.latex?N^{\frac{6}/5}">?</th>
+        <th>1</th>
+    </tr>
+    <tr>
+        <th>quicksort</th>
+        <th>no</th>
+        <th>yes</th>
+        <th><img src="http://latex.codecogs.com/gif.latex?NlogN"></th>
+        <th><img src="http://latex.codecogs.com/gif.latex?lgN"></th>
+        <th>probabilistic guarantee</th>
+    </tr>
+    <tr>
+        <th>selection sort</th>
+        <th>no</th>
+        <th>yes</th>
+        <th>between N and <img src="http://latex.codecogs.com/gif.latex?NlogN"></th>
+        <th><img src="http://latex.codecogs.com/gif.latex?lgN"></th>
+        <th>probabilistic, also depends on distribution of input keys</th>
+    </tr>
+    <tr>
+        <th>mergesort</th>
+        <th>yes</th>
+        <th>no</th>
+        <th><img src="http://latex.codecogs.com/gif.latex?NlogN"></th>
+        <th>N</th>
+    </tr>
+    <tr>
+        <th>heapsort</th>
+        <th>no</th>
+        <th>yes</th>
+        <th><img src="http://latex.codecogs.com/gif.latex?NlogN"></th>
+        <th>1</th>
+    </tr>
+</table>
+Performance characteristics of sorting algorithms
+
+##### Property T
+
+Quicksort is the fastest general-purpose sort.
+
+#### Sorting primitive types
+
+In some performance-critical applications, the focus may be on sorting numbers, so it is reasonable to avoid the costs of using references and sort primitive types instead.
+
+#### Java system sort
+
+As an example of applying the information given in the table on page 342, consider Java’s primary system sort method,  java.util.Arrays.sort(). With overloading of argument types, this name actually represents a collection of methods:
+
+* A different method for each primitive type
+* A method for data types that implement Comparable
+* A method that uses a Comparator
