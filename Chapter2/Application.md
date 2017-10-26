@@ -177,14 +177,51 @@ Performance characteristics of sorting algorithms
 
 Quicksort is the fastest general-purpose sort.
 
-#### Sorting primitive types
+##### Sorting primitive types
 
 In some performance-critical applications, the focus may be on sorting numbers, so it is reasonable to avoid the costs of using references and sort primitive types instead.
 
-#### Java system sort
+##### Java system sort
 
 As an example of applying the information given in the table on page 342, consider Java’s primary system sort method,  java.util.Arrays.sort(). With overloading of argument types, this name actually represents a collection of methods:
 
 * A different method for each primitive type
 * A method for data types that implement Comparable
 * A method that uses a Comparator
+
+#### Reduction
+
+A reduction is a situation where an algorithm developed for one problem is used to solve another. Applications programmers are quite used to the concept of reduction (whether or not it is explicitly articulated)—every time you make use of a method that solves problem B in order to solve problem A, you are doing a reduction from A to B.
+
+##### Duplicates
+
+First sort the array, then make a pass through the sorted array, taking note of duplicate
+keys that appear consecutively in the ordered array.
+
+##### Rankings
+
+A permutation (or ranking) is an array of N integers where each of the integers between 0 and N-1 appears exactly once. The Kendall tau distance between two rankings is the number of pairs that are in different order in the two rankings.
+
+##### Priority-queue reductions
+
+In Section 2.4, we considered two examples of problems that reduce to a sequence of operations on priority queues. TopM, on page 311, finds the M items in an input stream with the highest keys.
+
+##### Median and order statistics
+
+An important application related to sorting but for which a full sort is not required is the operation of finding the median of a collection of keys (the value with the property that half the keys are no larger and half the keys are no smaller).
+
+##### Proposition U
+
+Partitioning-based selection is a linear-time algorithm, on average.
+
+#### A brief survey of sorting applications
+
+* Commercial computing
+* Search for information
+* Opeeration research
+* Numerical computations
+* Combinatorial search
+* Prim's algorithm and Dijkstra's algorithm
+* Kruskal's algorithm
+* Huffman compression
+* String-processing
