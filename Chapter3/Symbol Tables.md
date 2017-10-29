@@ -124,3 +124,36 @@ The best practice in Java is to make compareTo() consistent with equals() in all
 ##### Cost model
 
 Whether we use equals() (for symbol tables where keys are not Comparable) or compareTo() (for ordered symbol tables with Comparable keys), we use the term compare to refer to the operation of comparing a symboltable entry against a search key.
+
+#### Sample clients
+
+While we defer detailed consideration of applications to Section 3.5, it is worthwhile to consider some client code before considering implementations.
+
+##### Test client
+
+For tracing our algorithms on small inputs we assume that all of our implementations use the test client below, which takes a sequence of strings from standard input, builds a symbol table that associates the value i with the ith string in the input, and then prints the table.
+
+#### Performance client
+
+FrequencyCounter (on the next page) is a symbol-table client that finds the number of occurrences of each string (having at least as many characters as a given threshold length) in a sequence of strings from standard input, then iterates through the keys to find the one that occurs the most frequently. This client is an example of a dictionary client, an application that we discuss in more detail in Section 3.5.
+
+FrequencyCounter is surrogate for a very common situation. Specifically, it has the following characteristics, which are shared by many other symbol-table clients:
+
+* Search and insert operations are intermixed.
+* The number of distinct keys is not small.
+* Substantially more searches than inserts are likely.
+* Search and insert patterns, though unpredictable, are not random.
+
+##### Sequential search in an unordered linked list
+
+One straightforward option for the underlying data structure for a symbol table is a linked list of nodes that contain keys and values, as in the code on the facing page.
+
+##### Proposition A
+
+Search misses and insertions in an (unordered) linked-list symbol table having N key-value pairs both require N compares, and search hits N compares in the worst case. In particular, inserting N distinct keys into an initially empty linked-list symbol table uses ~![](http://latex.codecogs.com/gif.latex?\frac{N^2}/2) compares.
+
+##### Corollary
+
+Inserting N distinct keys into an initially empty linked-list symbol table uses ~![](http://latex.codecogs.com/gif.latex?\frac{N^2}/2) compares.
+
+#### Binary search in an ordered array
