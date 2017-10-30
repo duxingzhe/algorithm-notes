@@ -150,11 +150,11 @@ One straightforward option for the underlying data structure for a symbol table 
 
 ##### Proposition A
 
-Search misses and insertions in an (unordered) linked-list symbol table having N key-value pairs both require N compares, and search hits N compares in the worst case. In particular, inserting N distinct keys into an initially empty linked-list symbol table uses ~![](http://latex.codecogs.com/gif.latex?\frac{N^2}/2) compares.
+Search misses and insertions in an (unordered) linked-list symbol table having N key-value pairs both require N compares, and search hits N compares in the worst case. In particular, inserting N distinct keys into an initially empty linked-list symbol table uses ~![](http://latex.codecogs.com/gif.latex?\frac{N^2}2) compares.
 
 ##### Corollary
 
-Inserting N distinct keys into an initially empty linked-list symbol table uses ~![](http://latex.codecogs.com/gif.latex?\frac{N^2}/2) compares.
+Inserting N distinct keys into an initially empty linked-list symbol table uses ~![](http://latex.codecogs.com/gif.latex?\frac{N^2}2) compares.
 
 #### Binary search in an ordered array
 

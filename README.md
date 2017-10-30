@@ -19,4 +19,4 @@ The videos of Introduction to Algorithm have been updated. Please visit:
 
 ## Reference book:
 
-*Algorithm 4th Edition*. It could be easier understanding than Introduction to Algorithm.
+*Algorithm 4th Edition*. It could be easier understanding than *Introduction to Algorithm*.
