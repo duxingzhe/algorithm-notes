@@ -283,7 +283,75 @@ public class BinarySearch<Key implements Comparable<Key>, Value> {
     }
 }
 ```
+<table>
+    <tr>
+        <th rowspan="2">algorithm(data structure)</th>
+        <th colspan="2">worst-case cost(after N inserts)</th>
+        <th colspan="2">average-case cost(after N random inserts)</th>
+        <th rowspan="2">efficiently support ordered operations?</th>
+    </tr>
+    <tr>
+        <th>search</th>
+        <th>insert</th>
+        <th>search hit</th>
+        <th>insert</th>
+    </tr>
+    <tr>
+        <th>sequential search(unordered linked list)</th>
+        <th>N</th>
+        <th>N</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?\frac{N}{2}></img></th>
+        <th>N</th>
+        <th>No</th>
+    </tr>
+    <tr>
+        <th>binary search(ordered array)</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?lgN></img></th>
+        <th>2N</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?lgN></img></th>
+        <th>N</th>
+    </tr>
+</table>
 
 BinarySearchST costs
+
+<table>
+    <tr>
+        <th >underlying data structure</th>
+        <th >implementation</th>
+        <th >pros</th>
+        <th >cons</th>
+    </tr>
+    <tr>
+        <th>linked list(sequential search)</th>
+        <th>SequentialSearchST</th>
+        <th>best for tiny STs</th>
+        <th>slow for large STs</th>
+    </tr>
+    <tr>
+        <th>ordered array(binary search)</th>
+        <th>BinarySearchST</th>
+        <th>optimal search and space, order-based ops</th>
+        <th>slow insert</th>
+    </tr>
+    <tr>
+        <th>binary search tree</th>
+        <th>BST</th>
+        <th>easy to implement, order-based ops</th>
+        <th>no guarantees space for links</th>
+    </tr>
+    <tr>
+        <th>balanced BST</th>
+        <th>RedBlackBST</th>
+        <th>optimal search and insert, order-based ops</th>
+        <th>space for links</th>
+    </tr>
+    <tr>
+        <th>hash table</th>
+        <th>SeparateChainingHashST<br/>LinearProbingHashST</th>
+        <th>fast search/insert for common types of data</th>
+        <th>need hash for each type no order-based ops space for links/empty</th>
+    </tr>
+</table>
 
 Cost summary for basic symbol-table implementations

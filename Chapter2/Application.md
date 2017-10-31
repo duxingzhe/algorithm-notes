@@ -137,7 +137,7 @@ A sorting method is stable if it preserves the relative order of equal keys in t
         <th>yes</th>
         <th>
         <img src="http://latex.codecogs.com/gif.latex?NlogN">?
-        <img src="http://latex.codecogs.com/gif.latex?N^{\frac{6}/5}">?</th>
+        <img src="http://latex.codecogs.com/gif.latex?N^{\frac{6}5}">?</th>
         <th>1</th>
     </tr>
     <tr>
