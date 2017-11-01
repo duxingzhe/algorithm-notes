@@ -112,3 +112,103 @@ public class BST<Key extends Comparable<Key>,Value {
 
 }
 ```
+
+#### Analysis
+
+The running times of algorithms on binary search trees depend on the shapes of the trees, which, in turn, depend on the order in which keys are inserted. In the best case, a tree with N nodes could be perfectly balanced, with ~![](http://latex.codecogs.com/gif.latex?NlgN) nodes between the root and each null link. In the worst case there could be N nodes on the search path. The balance in typical trees turns out to be much closer to the best case than the worst case.
+
+##### Proposition C
+
+Search hits in a BST built from N random keys require ~![](http://latex.codecogs.com/gif.latex?2lnN) (about ![](http://latex.codecogs.com/gif.latex?1.39lgN)) compares, on the average.
+
+##### Proposition D
+
+Insertions and search misses in a BST built from N random keys require ~![](http://latex.codecogs.com/gif.latex?2lnN) (about ![](http://latex.codecogs.com/gif.latex?1.39lgN)) compares, on the average.
+
+This prediction has at least thefollowing inherent inaccuracies:
+
+* Many operations are for smaller tables.
+* The keys are not random.
+* The table size may be too small for the approximation 2 ln N to be accurate.
+
+#### Order-based methods and deletion
+
+An important reason that BSTs are widely used is that they allow us to keep the keys in order.
+
+##### Minimum and maximum
+
+If the left link of the root is null, the smallest key in a BST is the key at the root; if the left link is not null, the smallest key in the BST is the smallest key in the subtree rooted at the node referenced by the left link.
+
+##### Floor and ceiling
+
+If a given key key is less than the key at the root of a BST, then the floor of key (the largest key in the BST less than or equal to key) must be in the left subtree. If key is greater than the key at the root, then the floor of key could be in the right subtree, but only if there is a key smaller than or equal to key in the right subtree; if not (or if key is equal to the key at the root), then the key at the root is the floor of key.
+
+##### Selection
+
+Selection in a BST works in a manner analogous to the partition-based method of selection in an array that we studied in Section 2.5. We maintain in BST nodes the variable N that counts the number of keys in the subtree rooted at that node precisely to support this operation.
+
+##### Rank
+
+The inverse method rank() that returns the rank of a given key is similar: if the given key is equal to the key at the root, we return the number of keys t in the left subtree; if the given key is less than the key at the root, we return the rank of the key in the left subtree (recursively computed); and if the given key is larger than the key at the root, we return t plus one (to count the key at the root) plus the rank of the key in the right subtree (recursively computed).
+
+##### Delete the minimum/maximum
+
+The most difficult BST operation to implement is the delete() method that removes a key-value pair from the symbol table. As a warmup, consider deleteMin() (remove the key-value pair with the smallest key). For deleteMin() we go left until finding a Node that has a null left link and then replace the link to that node by its right link (simply by returning the right link in the recursive method). The deleted node, with no link now pointing to it, is available for garbage collection.
+
+##### Delete
+
+The replacement preserves order in the tree because there are no keys between x.key and the successor’s key. We can accomplish the task of replacing x by its successor in four (!) easy steps:
+
+* Save a link to the node to be deleted in t.
+* Set x to point to its successor min(t.right).
+* Set the right link of x (which is supposed to point to the BST containing all the keys larger than x.key) to deleteMin(t.right), the link to the BST containing all the keys that are larger than x.key after the deletion.
+* Set the left link of x (which was null) to t.left
+(all the keys that are less than both the deleted
+key and its successor).
+
+##### Range queries
+
+To implement the keys() method that returns the keys in a given range, we begin with a basic recursive BST traversal method, known as inorder traversal. To illustrate the method, we consider the task of printing all the keys in a BST in order.
+
+###### Proposition E
+
+In a BST, all operations take time proportional to the height of the tree, in the worst case.
+
+<table>
+    <tr>
+        <th rowspan="2">algorithm(data structure)</th>
+        <th colspan="2">worst-case cost(after N inserts)</th>
+        <th colspan="2">average-case cost(after N random inserts)</th>
+        <th rowspan="2">efficiently support ordered operations?</th>
+    </tr>
+    <tr>
+        <th>search</th>
+        <th>insert</th>
+        <th>search hit</th>
+        <th>insert</th>
+    </tr>
+    <tr>
+        <th>sequential search(unordered linked list)</th>
+        <th>N</th>
+        <th>N</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?\frac{N}{2}></img></th>
+        <th>N</th>
+        <th>No</th>
+    </tr>
+    <tr>
+        <th>binary search(ordered array)</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?lgN></img></th>
+        <th>2N</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?lgN></img></th>
+        <th><img src=http://latex.codecogs.com/gif.latex?\frac{N}{2}></img></th>
+        <th>yes</th>
+    </tr>
+    <tr>
+        <th>binary tree search(BST)</th>
+        <th>N</th>
+        <th>N</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?1.39lgN></img></th>
+        <th><img src=http://latex.codecogs.com/gif.latex?1.39lgN></img></th>
+        <th>yes</th>
+    </tr>
+</table>

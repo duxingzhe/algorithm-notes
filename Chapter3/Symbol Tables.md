@@ -310,6 +310,7 @@ public class BinarySearch<Key implements Comparable<Key>, Value> {
         <th>2N</th>
         <th><img src=http://latex.codecogs.com/gif.latex?lgN></img></th>
         <th>N</th>
+        <th>yes</th>
     </tr>
 </table>
 

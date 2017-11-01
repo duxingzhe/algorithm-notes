@@ -31,7 +31,7 @@ This is a recursive mergesort implementation based on this abstract inplace merg
 
 Proposition F
 
-Top-down mergesort uses between ![](http://latex.codecogs.com/gif.latex?\frac{1}/{2}NlgN) and ![](http://latex.codecogs.com/gif.latex?NlgN) compares to sort any array of length N.
+Top-down mergesort uses between ![](http://latex.codecogs.com/gif.latex?\frac{1}{2}NlgN) and ![](http://latex.codecogs.com/gif.latex?NlgN) compares to sort any array of length N.
 
 ```
 public class Merge {
@@ -90,14 +90,14 @@ Bottom-up mergesort consists of a sequence of passes over the whole array, doing
 
 #### Proposition H
 
-Bottom-up mergesort uses between ![](http://latex.codecogs.com/gif.latex?\frac{1}/{2}NlgN) and ![](http://latex.codecogs.com/gif.latex?NlgN) and ![](http://latex.codecogs.com/gif.latex?NlgN) compares and at most ![](http://latex.codecogs.com/gif.latex?6NlgN) array accesses to sort an array of length N.
+Bottom-up mergesort uses between ![](http://latex.codecogs.com/gif.latex?\frac{1}{2}NlgN) and ![](http://latex.codecogs.com/gif.latex?NlgN) and ![](http://latex.codecogs.com/gif.latex?NlgN) compares and at most ![](http://latex.codecogs.com/gif.latex?6NlgN) array accesses to sort an array of length N.
 
 #### The complexity of Sorting
 
 #### Proposition I
 
 No compare-based sorting algorithm can guarantee to sort N items
-with fewer than ![](http://latex.codecogs.com/gif.latex?lg(N!) ~ ![](http://latex.codecogs.com/gif.latex?NlgN) compares.
+with fewer than ![](http://latex.codecogs.com/gif.latex?lg{N!}) ~ ![](http://latex.codecogs.com/gif.latex?NlgN) compares.
 
 #### Proposition J
 
