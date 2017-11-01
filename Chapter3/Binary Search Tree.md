@@ -143,6 +143,23 @@ If the left link of the root is null, the smallest key in a BST is the key at th
 
 If a given key key is less than the key at the root of a BST, then the floor of key (the largest key in the BST less than or equal to key) must be in the left subtree. If key is greater than the key at the root, then the floor of key could be in the right subtree, but only if there is a key smaller than or equal to key in the right subtree; if not (or if key is equal to the key at the root), then the key at the root is the floor of key.
 
+```
+private Node floor(Node x, Key key){
+    if(x==null)
+        return null;
+    int cmp=key.compareTo(x.key);
+    if(cmp==0)
+        return x;
+    if(cmp<0)
+        return floor(x.left,key);
+    Node t=floor(x.right,key);
+    if(t!=null)
+        return t;
+    else
+        return x;
+}
+```
+
 ##### Selection
 
 Selection in a BST works in a manner analogous to the partition-based method of selection in an array that we studied in Section 2.5. We maintain in BST nodes the variable N that counts the number of keys in the subtree rooted at that node precisely to support this operation.
@@ -155,6 +172,40 @@ The inverse method rank() that returns the rank of a given key is similar: if th
 
 The most difficult BST operation to implement is the delete() method that removes a key-value pair from the symbol table. As a warmup, consider deleteMin() (remove the key-value pair with the smallest key). For deleteMin() we go left until finding a Node that has a null left link and then replace the link to that node by its right link (simply by returning the right link in the recursive method). The deleted node, with no link now pointing to it, is available for garbage collection.
 
+```
+public Key select(int k){
+    return select(root, k).key;
+}
+
+private Node select(Node x, int k){
+    if(x==null)
+        return null;
+    int t=size(x.left);
+    if(t>k)
+        return select(x.left,k);
+    else if(t<k)
+        return select(x.right,k);
+    else
+        return x;
+}
+
+public int rank(Key key){
+    return rank(key,root);
+}
+
+private int rank(Key key, Node x){
+    if(x==null)
+        return 0;
+    int cmp=key.compareTo(x.key);
+    if(cmp<0)
+        return rank(key,x.left);
+    else if(cmp>0)
+        return rank(key,x.right);
+    else
+        return size(x.left);
+}
+```
+
 ##### Delete
 
 The replacement preserves order in the tree because there are no keys between x.key and the successor’s key. We can accomplish the task of replacing x by its successor in four (!) easy steps:
@@ -166,9 +217,55 @@ The replacement preserves order in the tree because there are no keys between x.
 (all the keys that are less than both the deleted
 key and its successor).
 
+```
+public void deleteMin(){
+    root=deleteMin(root);
+}
+
+private Node deleteMin(Node x){
+    if(x.left==null)
+        return x.right;
+    x.left=deleteMin(x.left);
+    x.N=size(x.left)+size(x.right)+1;
+    return x;
+}
+
+private Node delete(Node x, Key key){
+    if(x==null)
+        return null;
+    int cmp=key.compareTo(x.key);
+    if(cmp<0)
+        x.left=delete(x.left,key);
+    else if(cmp>0)
+        x.right=delete(x.right,key);
+    else{
+        if(x.right==null)
+            return x.left;
+        if(x.left==null)
+            return x.right;
+        Node t=x;
+        x=min(t.right);
+        x.right=deleteMin(t.right);
+        x.left=t.left;
+    }
+    x.N=size(x.left)+size(x.right)+1;
+    return x;
+}
+```
+
 ##### Range queries
 
 To implement the keys() method that returns the keys in a given range, we begin with a basic recursive BST traversal method, known as inorder traversal. To illustrate the method, we consider the task of printing all the keys in a BST in order.
+
+```
+private void print(Node x){
+    if(x==null)
+        return;
+    print(x.left);
+    StdOut.println(x.key);
+    print(x.right);
+}
+```
 
 ###### Proposition E
 
