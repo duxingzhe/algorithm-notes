@@ -111,8 +111,6 @@ Now suppose that we add a new node at the bottom that is connected to a 3-node. 
 
 The 2-3 tree insertion algorithm calls for us to split the 3-node, passing the middle key up to be inserted into its parent, continuing until encountering a 2-node or the root.
 
-* If the right child is red and the left
-child is black, rotate left.
-* If both the left child and its left
-child are red, rotate right.
+* If the right child is red and the left child is black, rotate left.
+* If both the left child and its left child are red, rotate right.
 * If both children are red, flip colors.
