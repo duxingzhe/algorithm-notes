@@ -146,3 +146,74 @@ On the way down the tree, one of the following cases must hold:
 ##### Delete
 
 The same transformations along the search path just described for deleting the minimum are effective to ensure that the current node is not a 2-node during a search for any key. If the search key is at the bottom, we can just remove it. If the key is not at the bottom, then we have to exchange it with its successor as in regular BSTs. Then, since the current node is not a 2-node, we have reduced the problem to deleting the minimum in a subtree whose root is not a 2-node, and we can use the procedure just described for that subtree. After the deletion, as usual, we split any remaining 4-nodes on the search path on the way up the tree.
+
+#### Properties of red-black BSTs
+
+The end result is that all symbol-table operations in red-black BSTs are guaranteed to be logarithmic in the size of the tree (except for range search, which additionally costs time proportional to the number of keys returned).
+
+##### Analysis
+
+First, we establish that red-black BSTs, while not perfectly balanced, are always nearly so, regardless of the order in which the keys are inserted.
+
+##### Proposition G
+
+The height of a red-black BST with N nodes is no more than ![](http://latex.codecogs.com/gif.latex?2lgN).
+
+##### Property H
+
+The average length of a path from the root to a node in a red-black BST with N nodes is ~![](http://latex.codecogs.com/gif.latex?1.00lgN).
+
+##### Ordered symbol-table API
+
+One of the most appealing features of red-black BSTs is that the complicated code is limited to the put() (and deletion) methods. Our code for the minimum/maximum, select, rank, floor, ceiling and range queries in standard BSTs can be used without any change, since it operates on BSTs and has no need to refer to the node color. Algorithm 3.4, together with these methods (and the deletion methods), leads to a complete implementation of our ordered symbol-table API. Moreover, all of the methods benefit from the near-perfect balance in the tree because they all require time proportional to the tree height, at most.
+
+##### Proposition I
+
+In a red- black BST, the following operations take logarithmic time in the worst case: search, insertion, finding the minimum, finding the maximum, floor, ceiling, rank, select, delete the minimum, delete the maximum, delete, and range count.
+
+<table>
+    <tr>
+        <th rowspan="2">algorithm(data structure)</th>
+        <th colspan="2">worst-case cost(after N inserts)</th>
+        <th colspan="2">average-case cost(after N random inserts)</th>
+        <th rowspan="2">efficiently support ordered operations?</th>
+    </tr>
+    <tr>
+        <th>search</th>
+        <th>insert</th>
+        <th>search hit</th>
+        <th>insert</th>
+    </tr>
+    <tr>
+        <th>sequential search(unordered linked list)</th>
+        <th>N</th>
+        <th>N</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?\frac{N}{2}></img></th>
+        <th>N</th>
+        <th>No</th>
+    </tr>
+    <tr>
+        <th>binary search(ordered array)</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?lgN></img></th>
+        <th>2N</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?lgN></img></th>
+        <th>N</th>
+        <th>yes</th>
+    </tr>
+    <tr>
+        <th>binary tree search(BST)</th>
+        <th>N</th>
+        <th>N</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?1.39lgN></img></th>
+        <th><img src=http://latex.codecogs.com/gif.latex?1.39lgN></th>
+        <th>yes</th>
+    </tr>
+    <tr>
+        <th>binary search(ordered array)</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?2lgN></img></th>
+        <th><img src=http://latex.codecogs.com/gif.latex?2lgN></img></th>
+        <th><img src=http://latex.codecogs.com/gif.latex?1.00lgN></img></th>
+        <th><img src=http://latex.codecogs.com/gif.latex?1.00lgN></img></th>
+        <th>yes</th>
+    </tr>
+</table>
