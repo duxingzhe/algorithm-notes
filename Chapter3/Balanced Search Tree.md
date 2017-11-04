@@ -114,3 +114,35 @@ The 2-3 tree insertion algorithm calls for us to split the 3-node, passing the m
 * If the right child is red and the left child is black, rotate left.
 * If both the left child and its left child are red, rotate right.
 * If both children are red, flip colors.
+
+####Implementation
+
+Since the balancing operations are to be performed on the way up the tree from the point of insertion, implementing them is easy in our standard recursive implementation: we just do them after the recursive calls, as shown in Algorithm 3.4.
+
+##### Deletion
+
+To describe it, we begin by returning to 2-3 trees. As with insertion, we can define a sequence of local transformations that allow us to delete a node while still maintaining perfect balance. The process is somewhat more complicated than for insertion, because we do the transformations both on the way down the search path, when we introduce temporary 4-nodes (to allow for a node to be deleted), and also on the way up the search path, where we split any leftover 4-nodes (in the same manner as for insertion).
+
+##### Top-down 2-3-4 trees
+
+As a first warmup for deletion, we consider a simpler algorithm that does transformations both on the way down the path and on the way up the path: an insertion algorithm for 2-3-4 trees, where the temporary 4-nodes that we saw in 2-3 trees can persist in the tree. The insertion algorithm is based on doing transformations on the way down the path to maintain the invariant that the current node is not a 4-node (so we are assured that there will be room to insert the new key at the bottom) and transformations on the way up the path to balance any 4-nodes that may have been created. The transformations on the way down are precisely the same transformations that we used for splitting 4-nodes in 2-3 trees.
+
+To implement this algorithm with redblack BSTs, we
+
+* Represent 4-nodes as a balanced subtree of three 2-nodes, with both the left and
+right child connected to the parent with a red link
+* Split 4-nodes on the way down the tree with color flips
+* Balance 4-nodes on the way up the tree with rotations, as for insertion
+
+##### Delete the minimum
+
+As a second warmup for deletion, we consider the operation of deleting the minimum from a 2-3 tree. The basic idea is based on the observation that we can easily delete a key from a 3-node at the bottom of the tree, but not from a 2-node.
+
+On the way down the tree, one of the following cases must hold:
+* If the left child of the current node is not a 2-node, there is nothing to do.
+* If the left child is a 2-node and its immediate sibling is not a 2-node, move a key from the sibling to the left child.
+* If the left child and its immediate sibling are 2-nodes, then combine them with the smallest key in the parent to make a 4-node, changing the parent from a 3-node to a 2-node or from a 4-node to a 3-node.
+
+##### Delete
+
+The same transformations along the search path just described for deleting the minimum are effective to ensure that the current node is not a 2-node during a search for any key. If the search key is at the bottom, we can just remove it. If the key is not at the bottom, then we have to exchange it with its successor as in regular BSTs. Then, since the current node is not a 2-node, we have reduced the problem to deleting the minimum in a subtree whose root is not a 2-node, and we can use the procedure just described for that subtree. After the deletion, as usual, we split any remaining 4-nodes on the search path on the way up the tree.
