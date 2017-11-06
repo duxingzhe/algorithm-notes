@@ -48,9 +48,44 @@ Client code expects that hashCode() disperses the keys uniformly among the possi
 
 The hash functions that we use uniformly and independently distribute keys among the integer values between 0 and M–1.
 
-##### Hashing with separate chaining
+#### Hashing with separate chaining
 
 A hash function converts keys into array indices. The second component of a hashing algorithm is collision resolution: a strategy for handling the case when two or more keys to be inserted hash to the same index. A straightforward and general approach to collision resolution is to build, for each of the M array indices, a linked list of the key-value pairs whose keys hash to that index. This method is known as separate chaining because items that collide are chained together in separate linked lists.
+
+```
+public class SeparateChainingHashST<Key, Value>{
+
+    private int N;
+    private int M;
+    private SequentialSearchST<Key,Value>[]st;
+
+    public SeparateChainingHashST(){
+        this(997);
+    }
+
+    public SeparateChainingHashST(int M){
+        this.M=M;
+        st(SequentialSearchST<Key,Value>[])new SequentialSearchST[M];
+        for(int i=0;i<M;i++){
+            st[i]=new SequentialSearchST();
+        }
+    }
+
+    private int hash(Key key){
+        return (key.hashCode()&0x7fffffff)%M;
+    }
+
+    public Value get(Key key){
+        return (Value)st[hash(key)];
+    }
+    
+    public void put(Key key, Value value){
+        st[hash(key)].put(key,value);
+    }
+    
+    public Iterable<Key> keys();
+}
+```
 
 ##### Proposition K
 
