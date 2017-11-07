@@ -106,3 +106,99 @@ To delete a key-value pair, simply hash to find the SequentialSearchST containin
 ##### Ordered operations
 
 The whole point of hashing is to uniformly disperse the keys, so any order in the keys is lost when hashing. If you need to quickly find the maximum or minimum key, find keys in a given range, or implement any of the other operations in the ordered symbol-table API on page 366, then hashing is not appropriate, since these operations will all take linear time.
+
+#### Hashing with linear probing
+
+Another approach to implementing hashing is to store N key-value pairs in a hash table of size M > N, relying on empty entries in the table to help with collision resolution. Such methods are called open-addressing hashing methods.
+
+The simplest open-addressing method is called linear probing: when there is a collision (when we hash to a table index that is already occupied with a key different from the search key), then we just check the next entry in the table (by incrementing the index). Linear probing is characterized by identifying three possible outcomes:
+
+* Key equal to search key: search hit
+* Empty position (null key at indexed position): search miss
+* Key not equal to search key: try next entry
+
+```
+public class LinearProbingHashST<Key, Value>{
+
+    private int N;
+    private int M=16;
+    private Key[] keys;
+    private Value[] values;
+
+    public LinearProbingHashST(){
+        keys=(Key[])new Object[M];
+        values=(Value[])new Object[M];
+    }
+
+    private int hash(Key key){
+        return (key.hashCode()&0x7fffffff)%M;
+    }
+
+    private void resize();
+
+    public void put(Key key, Value value){
+        if(N>=M/2)
+            resize(2*M);
+        int i;
+        for(i=hash(key);keys[i]!=null;i=(i+1)%M){
+            if(keys[i].equals(key)){
+                values[i]=value;
+                return;
+            }
+        }
+        keys[i]=key;
+        values[i]=value;
+        N++;
+    }
+
+    public Value get(Key key){
+        for(int i=hash(key);keys[i]!=null;i=(i+1)%M){
+            if(keys[i].equals(key)){
+                return values[i];
+            }
+        }
+        return null;
+    }
+}
+```
+
+##### Deletion
+
+How do we delete a key-value pair from a linear-probing table? If you think about the situation for a moment, you will see that setting the key’s table position to null will not work, because that might prematurely terminate the search for a key that was inserted into the table later.
+
+```
+public void delete(Key key){
+    if(!contains(key))
+        return;
+    int i=hash(key);
+    while(!key.equals(keys[i])){
+        i=(i+1)%M;
+    }
+    keys[i]=null;
+    values[i]=null;
+    i=(i+1)%M;
+    while(keys[i]!=null){
+        Key keyToRedo=keys[i];
+        Value valueToRedo=values[i];
+        keys[i]=null;
+        values[i]=null;
+        N--;
+        put(keyToRedo,valueToRedo);
+        i=(i+1)%M;
+    }
+    N--;
+    if(N>0&&N==M/8)
+        resize(M/2);
+}
+```
+
+##### Clustering
+
+The average cost of linear probing depends on the way in which the entries clump together into contiguous groups of occupied table entries, called clusters, when they are inserted.
+
+##### Analysis of linear probing
+
+Despite the relatively simple form of the results, precise analysis of linear probing is a very challenging task. Knuth’s derivation of the following formulas in 1962 was a landmark in the analysis of algorithms:
+
+Proposition M. In a linear-probing hash table with M lists and ![](http://latex.codecogs.com/gif.latex?N=\alpha{M}) keys, the
+average number of probes (under Assumption J) required is ~![](http://latex.codecogs.com/gif.latex?\frac{1}{2}(1+\frac{1}{1-a})) and ![](http://latex.codecogs.com/gif.latex?\frac{1}{2}(1+\frac{1}{(1-a)^2}))
