@@ -200,5 +200,59 @@ The average cost of linear probing depends on the way in which the entries clump
 
 Despite the relatively simple form of the results, precise analysis of linear probing is a very challenging task. Knuth’s derivation of the following formulas in 1962 was a landmark in the analysis of algorithms:
 
-Proposition M. In a linear-probing hash table with M lists and ![](http://latex.codecogs.com/gif.latex?N=\alpha{M}) keys, the
-average number of probes (under Assumption J) required is ~![](http://latex.codecogs.com/gif.latex?\frac{1}{2}(1+\frac{1}{1-a})) and ![](http://latex.codecogs.com/gif.latex?\frac{1}{2}(1+\frac{1}{(1-a)^2}))
+##### Proposition M
+
+In a linear-probing hash table with M lists and ![](http://latex.codecogs.com/gif.latex?N=\alpha{M}) keys, the average number of probes (under Assumption J) required is ~![](http://latex.codecogs.com/gif.latex?\frac{1}{2}(1+\frac{1}{1-a})) and ![](http://latex.codecogs.com/gif.latex?\frac{1}{2}(1+\frac{1}{(1-a)^2}))
+
+#### Array resizing
+
+We can use our standard array-resizing technique from Chapter 1 to ensure that the load factor never exceeds one-half. First, we need a new constructor for LinearProbingHashST that takes a fixed capacity as argument (add a line to the constructor in Algorithm 3.6 that sets M to the given value before creating the arrays). Next, we need the resize() method given at left, which creates a new LinearProbingHashST of the given size, puts all the keys and values in the table in the new one, then rehashes all the keys into the new table. These additions allow us to implement array doubling. The call to resize() in the first statement in put() ensures that the table is at most one-half full. This code builds a hash table twice the size with the same keys, thus halving the value of . As in other applications of array resizing, we also need to add
+
+if (N > 0 && ![](http://latex.codecogs.com/gif.latex?N\le\frac{M}{8})) resize(M/2);
+
+as the last statement in delete() to ensure that the table is at least one-eighth full. This ensures that the amount of memory used is always within a constant factor of the number of key-value pairs in the table. With array resizing, we are assured that ![](http://latex.codecogs.com/gif.latex?\alpha\le\frac{1}{2}).
+
+##### Separate chaining
+
+The same method works to keep lists short (of average length between 2 and 8) in separate chaining: replace LinearProbingHashST by SeparateChainingHashST in resize(), call resize(2*M) when (N >= M/2) in put(), and call resize(M/2) when (N > 0 && N <= M/8) in delete(). For separate chaining, array resizing is optional and not worth your trouble if you have a decent estimate of the client’s N: just pick a table size M based on the knowledge that search times are proportional to 1+ N/M. For linear probing, array resizing is necessary. A client that inserts more key-value pairs than you expect will encounter not just excessively long search times, but an infinite loop when the table fills.
+
+##### Amortized analysis
+
+From a theoretical standpoint, when we use array resizing, we must settle for an amortized bound, since we know that those insertions that cause the table to double will require a large number of probes.
+
+##### Proposition N
+
+Suppose a h ash table is built with array resizing, starting with an empty table. Under Assumption J, any sequence of t search, insert, and delete symbol-table operations is executed in expected time proportional to t and with memory usage always within a constant factor of the number of keys in the table.
+
+#### Memory
+
+<table>
+    <tr>
+        <th>method</th>
+        <th>space usage for N items(reference types)</th>
+    </tr>
+    <tr>
+        <th>separate chaining</th>
+        <th>~48N+64N</th>
+    </tr>
+    <tr>
+        <th>linear probing</th>
+        <th>between ~32N and ~128N</th>
+    </tr>
+    <tr>
+        <th>binary tree search(BST)</th>
+        <th>N</th>
+    </tr>
+    <tr>
+        <th>BSTs</th>
+        <th>~56N</th>
+    </tr>
+</table>
+Space usage in symbol tables
+
+Hashing is not a panacea, for several reasons, including:
+
+* A good hash function for each type of key is required.
+* The performance guarantee depends on the quality of the hash function.
+* Hash functions can be diffi cult and expensive to compute.
+* Ordered symbol-table operations are not easily supported.
