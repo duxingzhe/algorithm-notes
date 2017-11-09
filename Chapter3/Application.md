@@ -78,3 +78,143 @@ We will consider several representative examples in this section:
         <th>between 32N and 128N</th>
     </tr>
 </table>
+
+##### Primitive types
+
+Suppose that we have a symbol table with integer keys and associated floating-point numbers. When we use our standard setup, the keys and values are stored as Integer and Double wrapper-type values, so we need two extra memory references to access each key-value pair. These references may be no problem in an application that involves thousands of searches on thousands of keys but may represent excessive cost in an application that involves billions of searches on millions of keys. Using a primitive type instead of Key would save one reference per key-value pair. When the associated value is also primitive, we can eliminate another reference.
+
+##### Duplicate keys
+
+The possibility of duplicate keys sometimes needs special consideration in symboltable implementations. In many applications, it is desirable to associate multiple values with the same key.
+
+##### Java libraries
+
+Java’s java.util.TreeMap and java.util.HashMap libraries are symbol-table implementations based on red-black BSTs and hashing with separate chaining respectively.
+
+#### Set APIs
+
+Some symbol-table clients do not need the values, just the ability to insert keys into a table and to test whether a key is in the table.
+
+##### Dedup
+
+The prototypical filter example is a SET or HashSET client that removes duplicates in the input stream. It is customary to refer to this operation as dedup. We maintain a set of the string keys seen so far. If the next key is in the set, ignore it; if it is not in the set, add it to the set and print it. The keys appear on standard output in the order they appear on standard input, with duplicates removed.
+
+##### Whitelist and blacklist
+
+Another classic filter uses keys in a separate file to decide which keys from the input stream are passed to the output stream. This general process has many natural applications. The simplest example is a whitelist, where any key that is in the file is identified as “good.”
+
+```
+public class WhiteFilter{
+    
+    private WhiteFilter(){
+
+    }
+
+    public static void main(String[] args){
+        SET<String> set=new SET<String>();
+
+        In in=new In(args[0]);
+        while(!in.isEmpty()){
+            String word=in.readString();
+            set.add(word);
+        }
+
+        while(!StdIn.isEmpty()){
+            String word=StdIn.readString();
+            if(set.contains(word))
+                StdOut.println(word);
+        }
+    }
+}
+```
+
+#### Dictionary clients
+
+The most basic kind of symbol-table client builds a symbol table with successive put operations in order to support get requests. Many applications also take advantage of the idea that a symbol table is a dynamic dictionary, where it is easy to look up information and to update the information in the table. The following list of familiar examples illustrates the utility of this approach:
+
+* Phone book
+* Dictionary
+* Account infromation
+* Genomics
+* Experimental data
+* Compilers
+* File Systems
+* Internet DNS
+
+<table>
+    <tr>
+        <th>domain</th>
+        <th>key</th>
+        <th>value</th>
+    </tr>
+    <tr>
+        <th>phone book</th>
+        <th>name</th>
+        <th>phone number</th>
+    </tr>
+    <tr>
+        <th>dictionary</th>
+        <th>word</th>
+        <th>definition</th>
+    </tr>
+    <tr>
+        <th>account</th>
+        <th>account number</th>
+        <th>balance</th>
+    </tr>
+    <tr>
+        <th>genomics</th>
+        <th>codon</th>
+        <th>amino acid</th>
+    </tr>
+    <tr>
+        <th>data</th>
+        <th>data/time</th>
+        <th>results</th>
+    </tr>
+    <tr>
+        <th>compiler</th>
+        <th>variable name</th>
+        <th>memory location</th>
+    </tr>
+    <tr>
+        <th rowspan="2">file share</th>
+        <th>song name</th>
+        <th>machine</th>
+    </tr>
+    <tr>
+        <th>website</th>
+        <th>IP address</th>
+    </tr>
+</table>
+
+```
+public class LookupCSV {
+	
+	private LookupCSV() {
+		
+	}
+	
+	public static void main(String[] args) {
+		int keyField=Integer.parseInt(args[1]);
+		int valueField=Integer.parseInt(args[2]);
+		
+		In in=new In(args[0]);
+		while(in.hasNextLine()) {
+			String line=in.readLine();
+			String[] tokens=line.split(",");
+			String key=tokens[keyField];
+			String value=tokens[valueField];
+			st.put(key,value);
+		}
+		
+		while(!StdIn.isEmpty()) {
+			String s=StdIn.readString();
+			if(st.contains(s))
+				StdOut.println(st.get(s));
+			else
+				StdOut.println("Not found");
+		}
+	}
+}
+```
