@@ -218,3 +218,137 @@ public class LookupCSV {
 	}
 }
 ```
+
+#### Indexing clients
+
+Dictionaries are characterized by the idea that there is one value associated with each key, so the direct use of our ST data type, which is based on the associative-array abstraction that assigns one value to each key, is appropriate. We use the term index to describe symbol tables that associate multiple values with
+each key. Here are some more examples:
+
+* Commercial transactions. One way for a company that maintains customer accounts to keep track of a day’s transactions is to keep an index of the day’s transactions. The key is the account number; the value is the list of occurrences of that account number in the transaction list.
+* Web search. When you type a keyword and get a list of websites containing that keyword, you are using an index created by your web search engine. There is one value (the set of pages) associated with each key (the query), although the reality is a bit more complicated because we often specify multiple keys.
+* Movies and performers. The file movies.txt on the booksite (excerpted below) is taken from the Internet Movie Database (IMDB). Each line has a movie name (the key), followed by a list of performers in that movie (the value), separated by slashes.
+
+##### Inverted index
+
+The term inverted index is normally applied to a situation where values are used to locate keys.
+
+* Internet Movie DataBase (IMDB). In the example just considered, the input is an index that associates each movie with a list of performers. The inverted index associates each performer with a list of movies.
+* Book index. Every textbook has an index where you look up a term and get the page numbers containing that term. While creating a good index generally involves work by the book author to eliminate common and irrelevant words, a document preparation system will certainly use a symbol table to help automate the process. An interesting special case is known as a concordance, which associates each word in a text with the set of positions in the text where that word occurs.
+* Compiler. In a large program that uses a large number of symbols, it is useful to know where each name is used. Historically, an explicit printed symbol table was one of the most important tools used by programmers to keep track of where symbols are used in their programs. In modern systems, symbol tables are the basis of software tools that programmers use to manage names.
+* File search. Modern operating systems provide you with the ability to type a term and to learn the names of files containing that term. The key is the term; the value is the set of files containing that term.
+* Genomics. In a typical (if oversimplified) scenario in genomics research, a scientist wants to know the positions of a given genetic sequence in an existing genome or set of genomes. Existence or proximity of certain sequences may be of scientific significance. The starting point for such research is an index like a concordance, but modified to take into account the fact that genomes are not separated into words.
+
+```
+public class LookupIndex {
+	
+	public static void main(String args[]) {
+		In in=new In(args[0]);
+		String sp=args[1];
+		
+		ST<String, Queue<String>> st=new ST<String, Queue<String>>();
+		ST<String, Queue<String>> ts=new ST<String, Queue<String>>();
+		
+		while(in.hashNextLine()) {
+			String[] a=in.readLine().split(sp);
+			String key=a[0];
+			for(int i=1;i<a.length;i++) {
+				String value=a[i];
+				if(!st.contains(key)) {
+					st.put(key,new Queue<String>());
+				}
+				if(!ts.contains(value)) {
+					ts.put(value,new Queue<String>());
+				}
+				st.get(key).enqueue(value);
+				ts.get(value).enqueue(key);
+			}
+		}
+		
+		while(!StdIn.isEmpty()) {
+			String query=StdIn.readLine();
+			if(st.contains(query))
+				for(String s: st.get(query))
+					StdOut.println("  "+s);
+			if(ts.contains(query))
+				for(String s:ts.get(query))
+					StdOut.println("  "+s);
+		}
+	}
+
+}
+```
+
+FileIndex (on the facing page) takes file names from the command line and uses a symbol table to build an inverted index associating every word in any of the files with a SET of file names where the word can be found, then takes keyword queries from standard input, and produces its associated list of files. Developers of such tools typically embellish the process by paying careful attention to
+
+* The form of the query
+* The set of fi les/pages that are indexed
+* The order in which fi les are listed in the response
+
+```
+import java.io.File;
+
+public class FileIndex {
+	
+	public static void main(String[] args) {
+		ST<String, SET<File>> st=new ST<String,SET<File>>();
+		
+		for(String filename: args) {
+			File file=new File(filename);
+			In in=new In(file);
+			while(!in.isEmpty()) {
+				String word=in.readString();
+				if(!st.contains(word))
+					st.put(word,new SET<File>());
+				SET<File> set=st.get(word);
+				set.add(file);
+			}
+		}
+		
+		while(!StdIn.isEmpty()) {
+			String query=StdIn.readString();
+			if(st.contains(query))
+				for(File file:st.get(query)) {
+					StdOut.println("  "+file.getName());
+				}
+		}
+	}
+```
+
+Sparse vectors
+
+Our next example illustrates the importance of symbol tables in scientific and mathematical calculations. The basic calculation that we consider is matrix-vector multiplication: given a matrix and a vector, compute a result vector whose ith entry is the dot product of the given vector and the ith row of the matrix.
+
+```
+public class SparseVector {
+	
+	private HashST<Integer, Double> st;
+	
+	public SparseVector() {
+		st=new HashST<Integer, Double>();
+	}
+	
+	public int size() {
+		return st.size();
+	}
+	
+	public void put(int i, double x) {
+		st.put(i,x);
+	}
+	
+	public double get(int i) {
+		if(!st.contains(i))
+			return 0;
+		else
+			return st.get(i);
+	}
+	
+	public double dot(double[] that) {
+		double sum=0.0;
+		for(int i: st.keys()) {
+			sum+=that[i]*this.get(i);
+		}
+		return sum;
+	}
+
+}
+```
