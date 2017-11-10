@@ -228,6 +228,34 @@ each key. Here are some more examples:
 * Web search. When you type a keyword and get a list of websites containing that keyword, you are using an index created by your web search engine. There is one value (the set of pages) associated with each key (the query), although the reality is a bit more complicated because we often specify multiple keys.
 * Movies and performers. The file movies.txt on the booksite (excerpted below) is taken from the Internet Movie Database (IMDB). Each line has a movie name (the key), followed by a list of performers in that movie (the value), separated by slashes.
 
+<table>
+    <tr>
+        <th>domain</th>
+        <th>key</th>
+        <th>value</th>
+    </tr>
+    <tr>
+        <th>genomics</th>
+        <th>amino acid</th>
+        <th>list of codons</th>
+    </tr>
+    <tr>
+        <th>commercial</th>
+        <th>account number</th>
+        <th>list of transactions</th>
+    </tr>
+    <tr>
+        <th>web search</th>
+        <th>search key</th>
+        <th>list of web pages</th>
+    </tr>
+    <tr>
+        <th>IMDB</th>
+        <th>movie</th>
+        <th>list of performers</th>
+    </tr>
+</table>
+
 ##### Inverted index
 
 The term inverted index is normally applied to a situation where values are used to locate keys.
@@ -237,6 +265,40 @@ The term inverted index is normally applied to a situation where values are used
 * Compiler. In a large program that uses a large number of symbols, it is useful to know where each name is used. Historically, an explicit printed symbol table was one of the most important tools used by programmers to keep track of where symbols are used in their programs. In modern systems, symbol tables are the basis of software tools that programmers use to manage names.
 * File search. Modern operating systems provide you with the ability to type a term and to learn the names of files containing that term. The key is the term; the value is the set of files containing that term.
 * Genomics. In a typical (if oversimplified) scenario in genomics research, a scientist wants to know the positions of a given genetic sequence in an existing genome or set of genomes. Existence or proximity of certain sequences may be of scientific significance. The starting point for such research is an index like a concordance, but modified to take into account the fact that genomes are not separated into words.
+
+<table>
+    <tr>
+        <th>domain</th>
+        <th>key</th>
+        <th>value</th>
+    </tr>
+    <tr>
+        <th>IMDB</th>
+        <th>performer</th>
+        <th>set of movies</th>
+    </tr>
+    <tr>
+        <th>book</th>
+        <th>term</th>
+        <th>set of pages</th>
+    </tr>
+    <tr>
+        <th>compiler</th>
+        <th>identifier</th>
+        <th>set of places used</th>
+    </tr>
+    <tr>
+        <th>file search</th>
+        <th>search term</th>
+        <th>set of files</th>
+    </tr>
+    <tr>
+        <th>genomics</th>
+        <th>subsequence</th>
+        <th>set of locations</th>
+    </tr>
+</table>
+
 
 ```
 public class LookupIndex {
