@@ -202,12 +202,10 @@ It is instructive to think about the process of searching through a graph in ter
 To explore all passages in a maze:
 
 * Take any unmarked passage, unrolling a string behind you.
-* Mark all intersections and passages when you first visit
-them.
-* Retrace steps (using the string) when approaching a marked
-intersection.
-* Retrace steps when no unvisited options remain at an intersection
-encountered while retracing steps.
+* Mark all intersections and passages when you first visit them.
+* Retrace steps (using the string) when approaching a marked intersection.
+* Retrace steps when no unvisited options remain at an intersection encountered while retracing steps.
+
 The string guarantees that you can always find a way out and the marks guarantee that you avoid visiting any passage or intersection twice.
 
 ##### Warmup
