@@ -141,3 +141,83 @@ The standard graph representation for graphs that are not dense is called the ad
 * Space usage proportional to V + E
 * Constant time to add an edge
 * Time proportional to the degree of v to iterate through vertices adjacent to v (constant time per adjacent vertex processed)
+
+It is certainly reasonable to contemplate other operations that might be useful in applications, and to consider methods for
+
+* Adding a vertex
+* Deleting a vertex
+
+One way to handle such operations is to expand the API to use a symbol table (ST) instead of a vertex-indexed array (with this change we also do not need our convention that vertex names be integer indices). We might also consider methods for
+
+* Deleting an edge
+* Checking whether the graph contains the edge v-w
+
+To implement these methods (and disallow parallel edges) we might use a SET instead of a Bag for adjacency lists. We refer to this alternative as an adjacency set representation. We do not use these alternatives in this book for several reasons:
+
+* Our clients do not need to add vertices, delete vertices and edges, or check whether an edge exists.
+* When clients do need these operations, they typically are invoked infrequently or for short adjacency lists, so an easy option is to use a brute-force implementation that iterates through an adjacency list.
+* The SET and ST representations slightly complicate algorithm implementation code, diverting attention from the algorithms themselves.
+* A performance penalty of log V may be involved in some situations.
+
+It is not difficult to adapt our algorithms to accommodate other designs (for example disallowing parallel edges or self-loops) without undue performance penalties. The table below summarizes performance characteristics of the alternatives that we have mentioned.
+
+##### Design pattern for graph processing
+
+Since we consider a large number of graph-processing algorithms, our initial design goal is to decouple our implementations from the graph representation.
+
+Search API
+
+the union-find algorithms of Chapter 1. The constructor can build a UF object, do a union() operation for each of the graph’s edges, and implement marked(v) by calling connected(s, v). Implementing count() requires using a weighted UF implementation and extending its API to use a count() method that returns wt[find(v)]. This implementation is simple and efficient, but the implementation that we consider next is even simpler and more efficient. It is based on depth-first search, a fundamental recursive method that follows the graph’s edges to find the vertices connected to the source.
+
+```
+public class TestSearch {
+
+	public static void main(String[] args) {
+		Graph G=new Graph(new In(args[0]));
+		int s=Integer.parseInt(args[1]);
+		
+		for(int v=0;v<G.V();v++) {
+			if(search.marked(v)) {
+				StdOut.print(v+" ");
+			}
+		}
+		StdOut.println();
+		
+		if(search.count()!=G.V()) {
+			StdOut.print("NOT ");
+		}
+		StdOut.println("connected");
+	}
+}
+```
+
+#### Depth-first search
+
+We often learn properties of a graph by systematically examining each of its vertices and each of its edges. Determining some simple graph properties—for example, computing the degrees of all the vertices—is easy if we just examine each edge (in any order whatever). But many other graph properties are related to paths, so a natural way to learn them is to move from vertex to vertex along the graph’s edges.
+
+###### Searching in a maze
+
+It is instructive to think about the process of searching through a graph in terms of an equivalent problem that has a long and distinguished history—finding our way through a maze that consists of passages connected by intersections. Some mazes can be handled with a simple rule, but most mazes require a more sophisticated strategy. Using the terminology maze instead of graph, passage instead of edge, and intersection instead of vertex is making mere semantic distinctions, but, for the moment, doing so will help to give us an intuitive feel for the problem.
+
+To explore all passages in a maze:
+
+* Take any unmarked passage, unrolling a string behind you.
+* Mark all intersections and passages when you first visit
+them.
+* Retrace steps (using the string) when approaching a marked
+intersection.
+* Retrace steps when no unvisited options remain at an intersection
+encountered while retracing steps.
+The string guarantees that you can always find a way out and the marks guarantee that you avoid visiting any passage or intersection twice.
+
+##### Warmup
+
+The classic recursive method for searching in a connected graph (visiting all of its vertices and edges) mimics Tremaux maze exploration but is even simpler to describe. To search a graph, invoke a recursive method that visits vertices. To visit a vertex:
+
+* Mark it as having been visited.
+* Visit (recursively) all the vertices that are adjacent to it and that have not yet been marked.
+This method is called depth-first search (DFS).
+
+##### Proposition A
+
+DFS marks all the vertices connected to a given source in time proportional to the sum of their degrees.
