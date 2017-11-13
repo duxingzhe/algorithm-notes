@@ -219,3 +219,100 @@ This method is called depth-first search (DFS).
 ##### Proposition A
 
 DFS marks all the vertices connected to a given source in time proportional to the sum of their degrees.
+
+##### One-way passages
+
+The method call–return mechanism in the program corresponds to the string in the maze: when we have processed all the edges incident to a vertex (explored all the passages leaving an intersection), we “return” (in both senses of the word).
+
+Tracing DFS
+
+As usual, one good way to understand an algorithm is to trace its behavior on a small example. This is particularly true of depthfirst search. The first thing to bear in mind when doing a trace is that the order in which edges are examined and vertices visited depends upon the representation, not just the graph or the algorithm. Since DFS only examines vertices connected to the source, we use the small connected graph depicted at left as an example for traces. In this example, vertex 2 is the first vertex visited after 0 because it happens to be first on 0’s adjacency list. The second thing to bear in mind when doing a trace is that, as mentioned above, DFS traverses each edge in the graph twice, always finding a marked vertex the second time. One effect of this observation is that tracing a DFS takes twice as long as you might think!
+
+##### Detailed trace of depth-first search
+
+The figure at right shows the contents of the data structures just after each vertex is marked for our small example, with source 0. The search begins when the constructor calls the recursive dfs() to mark and visit vertex 0 and proceeds as follows:
+
+* Since 2 is first on 0’s adjacency list and is unmarked, dfs() recursively calls itself to mark and visit 2 (in effect, the system puts 0 and the current position on 0’s adjacency list on a stack).
+* Now, 0 is first on 2’s adjacency list and is marked, so dfs() skips it. Then, since 1 is next on 2’s adjacency list and is unmarked, dfs() recursively calls itself to mark and visit 1.
+* Visiting 1 is different: since both vertices on its list (0 and 2) are already marked, no recursive calls are needed, and dfs() returns from the recursive call dfs(1). The next edge examined is 2-3 (since 3 is the vertex after 1 on 2’s adjacency list), so dfs() recursively calls itself to mark and visit 3.
+* Vertex 5 is first on 3’s adjacency list and is unmarked, so dfs() recursively calls itself to mark and visit 5.
+* Both vertices on 5’s list (3 and 0) are already marked, so no recursive calls are needed,
+* Vertex 4 is next on 3’s adjacency list and is unmarked, so dfs() recursively calls itself to mark and visit 4, the last vertex to be marked.
+* After 4 is marked, dfs() needs to check the vertices on its list, then the remaining vertices on 3’s list, then 2’s list, then 0’s list, but no more recursive calls happen because all vertices are marked.
+
+Depth-first search is the first of several approaches that we consider to solve this problem, as well: Single-source paths. Given a graph and a source vertex s, support queries of the form Is there a path from s to a given target vertex v? If so, find such a path. DFS is deceptively simple because it is based on a familiar concept and is so easy to implement; in fact, it is a subtle and powerful algorithm that researchers have learned to put to use to solve numerous difficult problems.
+
+#### Finding paths
+
+```
+public static void main(String[] args) {
+    Graph G=new Graph(new In(args[0]));
+    int s=Integer.parseInt(args[1]);
+    Paths search=new Paths(G,s);
+    for(int v=0;v<G.V();v++) {
+        StdOut.print(s+" to "+v+": ");
+        if(search.hasPathTo(v)) {
+            for(int x:search.pathTo(v)) {
+                if(x==s)
+                    StdOut.print(x);
+                else
+                    StdOut.print("-"+x);
+            }
+        }
+        StdOut.println();
+    }
+}
+```
+
+##### Implementation
+
+Algorithm 4.1 on page 536 is a DFS-based implementation of Paths that extends the DepthFirstSearch warmup on page 531 by adding as an instance variable an array edgeTo[] of int values that serves the purpose of the ball of string in Tremaux exploration: it gives a way to find a path back to s for every vertex connected to s. Instead of just keeping track of the path from the current vertex back to the start, we remember a path from each vertex to the start.
+
+```
+public class DepthFirstPaths {
+	private boolean[] marked;
+	private int[] edgeTo;
+	private final int s;
+	
+	public DepthFirstPaths(Graph G,int s) {
+		marked=new boolean[G.V()];
+		edgeTo=new int[G.V()];
+		this.s=s;
+		dfs(G,s);
+	}
+	
+	private void dfs(Graph G, int v) {
+		marked[v]=true;
+		for(int w:G.adj(v)) {
+			if(!marked[w]) {
+				edgeTo[w]=v;
+				dfs(G,w);
+			}
+		}
+	}
+	
+	public boolean hasPathTo(int v) {
+		return marked[v];
+	}
+	
+	public Iterable<Integer> PathTo(int v){
+		if(!hasPathTo(v))
+			return null;
+		Stack<Integer> path=new Stack<Integer>();
+		for(int x=v;x!=s;x=edgeTo[x]) {
+			path.push(x);
+		}
+		path.push(s);
+		return path;
+	}
+}
+```
+
+##### Detailed trace
+
+The figure at right shows the contents of edgeTo[] just after each vertex is marked for our example, with source 0. The contents of marked[] and adj[] are the same as in the trace of DepthFirstSearch on page 533, as is the detailed description of the recursive calls and the edges checked, so these aspects of the trace are omitted.
+
+##### Proposition A (continued)
+
+D FS allows us to provide clients with a path from a given source to any marked vertex in time proportional its length.
+
