@@ -316,3 +316,83 @@ The figure at right shows the contents of edgeTo[] just after each vertex is mar
 
 D FS allows us to provide clients with a path from a given source to any marked vertex in time proportional its length.
 
+#### Breadth-first search
+
+The paths discovered by depth-first search depend not just on the graph, but also on the representation and the nature of the recursion. Naturally, we are often interested in solving the following problem:
+
+*Single-source shortest paths*. Given a graph and a source vertex s, support queries
+of the form Is there a path from s to a given target vertex v? If so, find a shortest
+such path (one with a minimal number of edges).
+
+The classical method for accomplishing this task, called breadth-first search (BFS ), is also the basis of numerous algorithms for processing graphs, so we consider it in detail in this section. DFS offers us little assistance in solving this problem, because the order in which it takes us through the graph has no relationship to the goal of finding shortest paths. In contrast, BFS is based on this goal. To find a shortest path from s to v, we start at s and check for v among all the vertices that we can reach by following one edge, then we check for v among all the vertices that we can reach from s by following two edges, and so forth.
+
+##### Implementation
+
+Algorithm 4.2 on page 540 is an implementation of BFS. It is based on maintaining a queue of all vertices that have been marked but whose adjacency lists have not been checked. We put the source vertex on the queue, then perform the following steps until the queue is empty:
+
+* Take the next vertex v from the queue and mark it.
+* Put onto the queue all unmarked vertices that are adjacent to v.
+
+The bfs() method in Algorithm 4.2 is not recursive. Instead of the implicit stack provided by recursion, it uses an explicit queue. The product of the search, as for DFS, is an array edgeTo[], a parent-link representation of a tree rooted at s, which defines the shortest paths from s to every vertex that is connected to s. The paths can be constructed for the client using the same pathTo() implementation that we used for DFS in Algorithm 4.1.
+
+Vertex 0 is put on the queue, then the loop completes the search as follows:
+
+* Removes 0 from the queue and puts its adjacent vertices 2, 1, and 5 on the queue, marking each and setting the edgeTo[] entry for each to 0.
+* Removes 2 from the queue, checks its adjacent vertices 0 and 1, which are marked, and puts its adjacent vertices 3 and 4 on the queue, marking each and setting the edgeTo[] entry for each to 2.
+* Removes 1 from the queue and checks its adjacent vertices 0 and 2, which are marked.
+* Removes 5 from the queue and checks its adjacent vertices 3 and 0, which are marked.
+* Removes 3 from the queue and checks its adjacent vertices 5, 4, and 2, which are marked.
+* Removes 4 from the queue and checks its adjacent vertices 3 and 2, which are marked.
+
+```
+public class BreathFirstPaths {
+
+	private boolean[] marked;
+	private int[] edgeTo;
+	private final int s;
+	
+	public BreathFirstPaths(Graph G, int s) {
+		marked=new boolean[G.V()];
+		edgeTo=new int[G.V()];
+		this.s=s;
+		bfs(G,s);
+	}
+	
+	private void bfs(Graph G, int s) {
+		Queue<Integer> queue=new Queue<Integer>();
+		marked[s]=true;
+		queue.enqueue(s);
+		while(!q.isEmpty()) {
+			int v=queue.dequeue();
+			for(int w:G.adj(v)) {
+				if(!marked[w]) {
+					edgeTo[w]=v;
+					marked[w]=true;
+					queue.enqueue(w);
+				}
+			}
+		}
+	}
+	
+	public boolean hasPathTo(int v) {
+		return marked[v];
+	}
+	
+	public Iterable<Integer> pathTo(int v);
+}
+```
+
+##### Proposition B
+
+For any vertex v reachable from s, BFS computes a shortest path from s to v (no path from s to v has fewer edges).
+
+##### Proposition B (continued)
+
+BFS takes time proportional to V+E in the worst case.
+
+As implied at the outset, DFS and BFS are the first of several instances that we will examine of a general approach to searching graphs. We put the source vertex on the data structure, then perform the following steps until the data structure is empty:
+
+* Take the next vertex v from the data structure and mark it.
+* Put onto the data structure all unmarked vertices that are adjacent to v.
+
+The algorithms differ only in the rule used to take the next vertex from the data structure (least recently added for BFS, most recently added for DFS). This difference leads to completely different views of the graph, even though all the vertices and edges connected to the source are examined no matter what rule is used.
