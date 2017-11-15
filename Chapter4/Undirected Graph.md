@@ -396,3 +396,120 @@ As implied at the outset, DFS and BFS are the first of several instances that we
 * Put onto the data structure all unmarked vertices that are adjacent to v.
 
 The algorithms differ only in the rule used to take the next vertex from the data structure (least recently added for BFS, most recently added for DFS). This difference leads to completely different views of the graph, even though all the vertices and edges connected to the source are examined no matter what rule is used.
+
+#### Connected components
+
+Our next direct application of depth-first search is to find the connected components of a graph. Recall from Section 1.5 (see page 216) that “is connected to” is an equivalence relation that divides the vertices into equivalence classes (the connected components).
+
+##### Implementation
+
+The implementation CC (Algorithm 4.3 on the next page) uses our marked[] array to find a vertex to serve as the starting point for a depthfirst search in each component.
+
+```
+public static void main(String[] args) {
+	Graph G=new Graph(new In(args[0]));
+	CC cc=new CC(G);
+	
+	int M=cc.count();
+	StdOut.println(M+" components");
+	
+	Bag<Integer>[] components;
+	components=(Bag<Integer>[]) new Bag[M];
+	for(int i=0;i<M;i++)
+		components[i]=new Bag<Integer>();
+	for(int v=0;v<G.V();v++)
+		components[cc.id(v)].add(v);
+	for(int i=0;i<M;i++) {
+		for(int v: components[i])
+			StdOut.prin(v+" ");
+		StdOut.println();
+	}
+}
+```
+
+```
+public class CC {
+	private boolean[] marked;
+	private int[] id;
+	private int count;
+	
+	public CC(Graph G) {
+		marked=new boolean[G.V()];
+		id=new int[G.V()];
+		for(int s=0;s<G.V();s++) {
+			if(!marked[s]) {
+				dfs(G,s);
+				count++;
+			}
+		};
+	}
+	
+	private void dfs(Graph G, int v) {
+		marked[v]=true;
+		id[v]=count;
+		for(int w: G.adj(v)) {
+			if(!marked[w])
+				dfs(G,w);
+		}
+	}
+	
+	public boolean connected(int v, int w) {
+		return id[v]==id[w];
+	}
+	
+	public int id(int v) {
+		return id[v];
+	}
+	
+	public int count() {
+		return count;
+	}
+}
+```
+
+##### Proposition C
+
+DFS uses preprocessing time and space proportional to V+E to support constant-time connectivity queries in a graph.
+
+##### Union-find
+
+In theory, DFS is faster than union-find because it provides a constant-time guarantee, which union-find does not; in practice, this difference is negligible, and union-find is faster because it does not have to build a full representation of the graph. More important, union-find is an online algorithm (we can check whether two vertices are connected in near-constant time at any point, even while adding edges), whereas the DFS solution must first preprocess the graph. Therefore, for example, we prefer union-find when determining connectivity is our only task or when we have a large number of queries intermixed with edge insertions but may find the DFS solution more appropriate for use in a graph ADT because it makes efficient use of existing infrastructure.
+
+Cycle detection. Support this query: Is a given graph acylic ?
+Two-colorability. Support this query: Can the vertices of a given graph be assigned one of two colors in such a way that no edge connects vertices of the same color ? which is equivalent to this question: Is the graph bipartite ?
+
+#### Symbol graphs
+
+Typical applications involve processing graphs defined in files or on web pages, using strings, not integer indices, to define and refer to vertices. We define an input format with the following properties:
+
+* Vertex names are strings.
+* A specifi ed delimiter separates vertex names (to allow for the possibility of spaces in names).
+* Each line represents a set of edges, connecting the fi rst vertex name on the line to each of the other vertices named on the line.
+* The number of vertices V and the number of edges E are both implicitly defined.
+
+```
+public static void main(String[] args) {
+	String filename=args[0];
+	String delim=args[1];
+	SymbolGraph sg=new SymbolGraph(filename,delim);
+	
+	while(StdIn.hasNextLine()) {
+		String source=StdIn.readLine();
+		for(int w;G.adj(sg.index(source)))
+			StdOut.println("   "+sg.name(w));
+	}
+}
+```
+
+###### Test client
+
+The test client at left builds a graph from the file named as the first command-line argument (using the delimiter as specified by the second command-line argument) and then takes queries from standard input.
+
+##### Implementation
+
+A full SymbolGraph implementation is given on page 552. It builds
+three data structures:
+
+* A symbol table st with String keys (vertex names) and int values (indices)
+* An array keys[] that serves as an inverted index, giving the vertex name associated with each integer index
+* A Graph G built using the indices to refer to vertices
