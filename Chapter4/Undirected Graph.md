@@ -513,3 +513,124 @@ three data structures:
 * A symbol table st with String keys (vertex names) and int values (indices)
 * An array keys[] that serves as an inverted index, giving the vertex name associated with each integer index
 * A Graph G built using the indices to refer to vertices
+
+```
+public class SymbolGraph {
+
+	private ST<String, Integer> st;
+	private String[] keys;
+	private Graph G;
+	
+	public SymbolGraph(String stream, String sp) {
+		st=new ST<String, Integer>();
+		In in=new In(stream);
+		while(in.hasNextLine()) {
+			String[] a=in.reandLine().split(sp);
+			for(int i=0;i<a.length;i++) {
+				if(!st.contains(a[i]))
+					st.put(a[i],st.size());
+			}
+		}
+		keys=new String[st.size()];
+		for(String name: st.keys) {
+			keys[st.get(name)]=name;
+		}
+		G=new Graph(st.size());
+		in=new In(stream);
+		while(in.hashNextLine()) {
+			String[] a=in.readLine().split(sp);
+			int v=st.get(a[0]);
+			for(int i=1;i<a.length;i++) {
+				G.addEdge(v,st.get(a[i]));
+			}
+		}
+	}
+	
+	public boolean contains(String s) {
+		return st.contains(s);
+	}
+	
+	public int index(String s) {
+		return st.get(s);
+	}
+	
+	public String name(int v) {
+		return keys[v];
+	}
+	
+	public Graph G() {
+		return G;
+	}
+}
+```
+
+###### Degrees of separation
+
+One of the classic applications of graph processing is to find the degree of separation between two individuals in a social network.
+
+```
+public class DegreesOfSeparation {
+
+	public static void main(String[] args) {
+		SymbolGraph sg=new SymbolGraph(args[0],arg[1]);
+		Graph G=sg.G();
+		
+		String source=args[2];
+		if(!sg.contains(source)) {
+			StdOut.prinln(source+" not in database.");
+			return;
+		}
+		
+		int s=sg.index(source);
+		BreadthFirstPaths bfs=new BreadthFirstPaths(G,s);
+		
+		while(!StdIn.isEmpty()) {
+			String sink=StdIn.readLine();
+			if(sg.contains(sink)) {
+				int t=sg.index(sink);
+				if(bfs.hasPathTo(t)) {
+					for(int v:bfs.pathTo(t)) {
+						StdOut.printlN("   "+sg.name(v));
+					}
+				}else {
+					StdOut.println("Not connected");
+				}
+			}else {
+				StdOut.println("Not in database.");
+			}
+		}
+	}
+}
+```
+
+<table>
+	<tr>
+        <th>problem</th>
+        <th>solution</th>
+    </tr>
+    <tr>
+        <th>single-source connectivity</th>
+        <th>DepthFirstSearch</th>
+    </tr>
+    <tr>
+        <th>single-source paths</th>
+        <th>DepthFirstPaths</th>
+    </tr>
+    <tr>
+        <th>single-source shortest paths</th>
+        <th>BreadthFirstPaths</th>
+    </tr>
+    <tr>
+        <th>connectivity</th>
+        <th>cc</th>
+    </tr>
+    <tr>
+        <th>cycle detection</th>
+        <th>Cycle</th>
+    </tr>
+    <tr>
+        <th>two-colorability(bipartiteness)</th>
+        <th>TwoColor</th>
+    </tr>
+</table>
+(Undirected) graph-processing problems addressed in this section
