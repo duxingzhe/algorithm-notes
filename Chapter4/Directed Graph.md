@@ -121,3 +121,178 @@ public class Digraph {
 	}
 }
 ```
+
+#### Reachability in digraphs
+
+Single-source reachability. Given a digraph and a source vertex s, support queries of the form Is there a directed path from s to a given target vertex v?
+
+Multiple-source reachability. Given a digraph and a set of source vertices, support queries of the form Is there a directed path from any vertex in the set to a given target vertex v?
+
+DirectedDFS uses our standard graph-processing paradigm and a standard recursive depth-first search to solve these problems. It calls the recursive dfs() for each source, which marks every vertex encountered. 
+
+##### Proposition D.
+
+DFS marks all the vertices in a digraph reachable from a given set of sources in time proportional to the sum of the outdegrees of the vertices marked.
+
+```
+public class DirectedDFS {
+
+	private boolean[] marked;
+	
+	public DirectedDFS(Digraph G, int s) {
+		marked=new boolean[G.V()];
+		dfs(G,s);
+	}
+	
+	public DirectedDFS(Digraph G, Iterable<Integer> sources) {
+		marked=new boolean[G.V()];
+		for(int s:sources) {
+			if(!marked[s])
+				dfs(G,s);
+		}
+	}
+	
+	private void dfs(Digraph G,int v) {
+		marked[v]=true;
+		for(int w:G.adj(v)) {
+			if(!marked[w]) {
+				dfs(G,w);
+			}
+		}
+	}
+	
+	public boolean marked(int v) {
+		return marked[v];
+	}
+	
+	public static void main(String[] args) {
+		Digraph G=new Digraph(new In(args));
+		
+		Bag<Integer> sources=new Bag<Integer>();
+		for(int i=1;i<args.length;i++) {
+			source.add(Integer.parseInt(args[i]));
+		}
+		DirectedDFS reachable=new DirectedDFS(G,sources);
+		for(int v=0;v<G.V();v++) {
+			if(reachable.marked(v)) {
+				StdOut.print(v+" ");
+			}
+		}
+		StdOut.println();
+	}
+}
+```
+
+##### Mark-and-sweep garbage collection
+
+An important application of multiple-source reachability is found in typical memory-management systems, including many implementations of Java.
+
+##### Finding paths in digraphs.
+
+Single-source directed paths. Given a digraph and a source vertex s, support queries of the form Is there a directed path from s to a given target vertex v? If so, find such a path.
+Single-source shortest directed paths. Given a digraph and a source vertex s, support queries of the form Is there a directed path from s to a given target vertex v? If so, find a shortest such path (one with a minimal number of edges).
+
+#### Cycles and DAGs
+
+Directed cycles are of particular importance in applications that involve processing digraphs. Identifying directed cycles in a typical digraph can be a challenge without the help of a computer, as shown at right.
+
+##### Scheduling problems
+
+A widely applicable problem-solving model has to do with arranging for the completion of a set of jobs, under a set of constraints, by specifying when and how the jobs are to be performed.
+
+Precedence-constrained scheduling. Given a set of jobs to be completed, with precedence constraints that specify that certain jobs have to be completed before certain other jobs are begun, how can we schedule the jobs such that they are all completed while still respecting the constraints?
+
+Topological sort. Given a digraph, put the vertices in order such that all its directed edges point from a vertex earlier in the order to a vertex later in the order (or report that doing so is not possible).
+
+<table>
+	<tr>
+        <th>application</th>
+        <th>vertex</th>
+        <th>edge</th>
+    </tr>
+    <tr>
+        <th>job schedule</th>
+        <th>job</th>
+        <th>precedence constraint</th>
+    </tr>
+    <tr>
+        <th>course schedule</th>
+        <th>course</th>
+        <th>prerequisite</th>
+    </tr>
+    <tr>
+        <th>inheritance</th>
+        <th>Java class</th>
+        <th>extends</th>
+    </tr>
+    <tr>
+        <th>spreadsheet</th>
+        <th>cell</th>
+        <th>formula</th>
+    </tr>
+    <tr>
+        <th>symbolic links</th>
+        <th>file name</th>
+        <th>link</th>
+    </tr>
+</table>
+Typical topological-sort applications
+
+##### Cycles in digraphs
+
+If job x must be completed before job y, job y before job z, and job z before job x, then someone has made a mistake, because those three constraints cannot all be satisfied. In general, if a precedence-constrained scheduling problem has a directed cycle, then there is no feasible solution.
+
+Directed cycle detection. Does a given digraph have a directed cycle? If so, find the vertices on some such cycle, in order from some vertex back to itself.
+
+##### Definition
+
+A directed acyclic graph (DAG) is a digraph with no directed cycles.
+
+```
+public class DirectedCycle {
+
+	private boolean[] marked;
+	private int[] edgeTo;
+	private Stack<Integer> cycle;
+	private boolean[] onStack;
+	
+	public DirectedCycle(Graph G) {
+		onStack=new boolean[G.V()];
+		edgeTo=new int[G.V()];
+		marked=new boolean[G.V()];
+		for(int v=0;v<G.V();v++){
+			if(!marked[v])
+				dfs(G,v);
+		}
+	}
+	
+	private void dfs(Digraph G, int v) {
+		onStack[v]=true;
+		marked[v]=true;
+		for(int w:G.adj(v)) {
+			if(this.hasCycle())
+				return;
+			else if(!marked[w]) {
+				edgeTo[w]=v;
+				dfs(G,w);
+			}else if(onStack[w]) {
+				cycle=new Stack<Integer>();
+				for(int x=v;x!=w;x++) {
+					cycle.push(x);
+				}
+				cycle.push(w);
+				cycle.push(v);
+			}
+		}
+		onStack[v]=false;
+	}
+	
+	public boolean hasCycle() {
+		return cycle!=null;
+	}
+	
+	public Iterable<Integer> cycle(){
+		return cycle;
+	}
+}
+```
