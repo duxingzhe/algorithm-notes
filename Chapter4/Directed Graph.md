@@ -296,3 +296,276 @@ public class DirectedCycle {
 	}
 }
 ```
+
+##### Depth-first orders and topological sort
+
+Precedence-constrained scheduling amounts to computing a topological order for the vertices of a DAG.
+
+##### Proposition E
+
+A digraph has a topological order if and only if it is a DAG.
+
+Three vertex orderings are of interest in typical applications:
+
+* Preorder : Put the vertex on a queue before the recursive calls.
+* Postorder : Put the vertex on a queue after the recursive calls.
+* Reverse postorder : Put the vertex on a stack after the recursive calls.
+
+```
+public class DepthFirstOrder {
+
+	private boolean[] marked;
+	
+	private Queue<Integer> pre;
+	private Queue<Integer> post;
+	private Stack<Integer> reversePost;
+	
+	public DepthFirstOrder(Digraph G) {
+		pre=new Queue<Integer>();
+		post=new Queue<Integer>();
+		reversePost=new Stack<Integer>();
+		marked=new boolean[G.V()];
+		
+		for(int v=0;v<G.V();v++) {
+			if(!marked[v])
+				dfs(G,v);
+		}
+	}
+	
+	private void dfs(Digraph G, int v) {
+		pre.enqueue(v);
+		
+		marked[v]=true;
+		for(int w:G.adj(v))
+			if(!marked[w]) {
+				dfs(G,v);
+			}
+		
+		post.enqueue(v);
+		reversePost.push(v);
+	}
+	
+	public Iterable<Integer> pre(){
+		return pre;
+	}
+	
+	public Iterable<Integer> post(){
+		return post;
+	}
+	
+	public Iterable<Integer> reversePost(){
+		return reversePost;
+	}
+}
+```
+
+```
+public class Topological {
+	
+	private Iterable<Integer> order;
+	
+	public Topological(Digraph G) {
+		DirectedCycle cyclefinder=new DirectedCycle(G);
+		if(!cyclefinder.hasCycle()) {
+			DepthFirstOrder dfs=new DepthFirstOrder(G);
+			order=dfs.reversePost();
+		}
+	}
+	
+	public Iterable<Integer> order(){
+		return order;
+	}
+	
+	public boolean isDAG() {
+		return order==null;
+	}
+	
+	public static void main(String[] args) {
+		String filename=args[0];
+		String separator=args[1];
+		SymbolDigraph sg=new SymbolDigraph(filename,separator);
+		
+		Topological top=new Topological(sg.G());
+		
+		for(int v;top.order()) {
+			StdOut.println(sg.name(v));
+		}
+	}
+
+}
+```
+
+##### Proposition F
+
+Reverse postorder in a DAG is a topological sort.
+
+##### Proposition G
+
+With DFS, we can topologically sort a DAG in time proportional to V+E.
+
+A job-scheduling application is typically a three-step process:
+
+* Specify the tasks and precedence constraints.
+* Make sure that a feasible solution exists, by detecting and removing cycles in the underlying digraph until none exist.
+* Solve the scheduling problem, using topological sort.
+
+#### Strong connectivity in digraphs
+
+We have been careful to maintain a distinction between reachability in digraphs and connectivity in undirected graphs. In an undirected graph, two vertices v and w are connected if there is a path connecting them—we can use that path to get from v to w or to get from w to v. In a digraph, by contrast, a vertex w is reachable from a vertex v if there is a directed path from v to w, but there may or may not be a directed path back to v from w.
+
+##### Definition
+
+Two vertices v and w are strongly connected if they are mutually reachable: that is, if there is a directed path from v to w and a directed path from w to v. A digraph is strongly connected if all its vertices are strongly connected to one another.
+
+###### Strong components
+
+Like connectivity in undirected graphs, strong connectivity in digraphs is an equivalence relation on the set of vertices, as it has the following properties:
+
+* Reflexive : Every vertex v is strongly connected to itself.
+* Symmetric : If v is strongly connected to w, then w is strongly connected to v.
+* Transitive : If v is strongly connected to w and w is strongly connected to x, then v is also strongly connected to x.
+As an equivalence relation, strong connectivity partitions the vertices into equivalence clasees.
+
+##### Examples of applications
+
+Strong connectivity is a useful abstraction in understanding the structure of a digraph, highlighting interrelated sets of vertices (strong components).
+
+<table>
+	<tr>
+        <th>web</th>
+        <th>page</th>
+        <th>hyperlink</th>
+    </tr>
+    <tr>
+        <th>textbook</th>
+        <th>top</th>
+        <th>reference</th>
+    </tr>
+    <tr>
+        <th>software</th>
+        <th>module</th>
+        <th>call</th>
+    </tr>
+    <tr>
+        <th>food web</th>
+        <th>organism</th>
+        <th>predator-prey relationship</th>
+    </tr>
+</table>
+Typical strong-component applications
+
+##### Kosaraju’s algorithm
+
+We saw in CC (Algorithm 4.3 on page 544) that computing connected components in undirected graphs is a simple application of depth-first search. The implementation KosarajuSCC on the facing page does the job with just a few lines of code added to CC, as follows:
+
+* Given a digraph G, use DepthFirstOrder to compute the reverse postorder of its reverse, ![](http://latex.codecogs.com/gif.latex?G^R).
+* Run standard DFS on G, but consider the unmarked vertices in the order just computed instead of the standard numerical order.
+* All vertices reached on a call to the recursive dfs() from the constructor are in a strong component (!), so identify them as in CC.
+
+```
+public class KosarajuSCC {
+	
+	private boolean[] marked;
+	private int[] id;
+	private int count;
+	
+	public KosarajuSCC(Digraph G) {
+		marked=new boolean[G.V()];
+		id=new int[G.V()];
+		DepthFirstOrder order=new DepthFirstOrder(G.reverse());
+		for(int s:order.reversePost()) {
+			if(!marked[s]) {
+				dfs(G,s);
+				count++;
+			}
+		}
+	}
+	
+	private void dfs(Digraph G, int v) {
+		marked[v]=true;
+		id[v]=count;
+		for(int w:G.adj(v)) {
+			if(!marked[w]) {
+				dfs(G,w);
+			}
+		}
+	}
+	
+	public boolean stronglyConnected(int v, int w) {
+		return id[v]==id[w];
+	}
+	
+	public int id(int v) {
+		return id[v];
+	}
+	
+	public int count() {
+		return count;
+	}
+
+}
+```
+
+###### Proposition H
+
+In a DFS of a digraph G where marked vertices are considered in reverse postorder given by a DFS of the digraph’s reverse G R (Kosaraju’s algorithm), the vertices reached in each call of the recursive method from the constructor are in a strong component.
+
+Strong connectivity. Given a digraph, support queries of the form: Are two given vertices strongly connected ? and How many strong components does the digraph have ?
+
+##### Proposition I
+
+Kosaraju’s algorithm uses preprocessing time and space proportional to V+E to support constant-time strong connectivity queries in a digraph.
+
+###### Reachability revisited
+
+With CC for undirected graphs, we can infer from the fact that two vertices v and w are connected that there is a path from v to w and a path (the same one) from w to v.
+
+All-pairs reachability. Given a digraph, support queries of the form Is there a directed path from a given vertex v to another given vertex w?
+
+##### Definition.
+
+The transitive closure of a digraph G is another digraph with the same set of vertices, but with an edge from v to w in the transitive closure if and only if w is reachable from v in G.
+
+<table>
+	<tr>
+        <th>problem</th>
+        <th>solution</th>
+    </tr>
+    <tr>
+        <th>single- and mulitple-source reachability</th>
+        <th>DirectedDFS</th>
+    </tr>
+    <tr>
+        <th>single-source directed paths</th>
+        <th>DepthFirstDirectedPaths</th>
+    </tr>
+    <tr>
+        <th>single-source shortest directed paths</th>
+        <th>BreadthFirstDirectedPaths</th>
+    </tr>
+    <tr>
+        <th>directed cycle detection</th>
+        <th>DirectedCycle</th>
+    </tr>
+    <tr>
+        <th>depth-first vertex orders</th>
+        <th>DepthFirstOrder</th>
+    </tr>
+    <tr>
+        <th>precedence-constrained scheduling</th>
+        <th>Topological</th>
+    </tr>
+	<tr>
+        <th>topological sort</th>
+        <th>Topological</th>
+    </tr>
+	<tr>
+		<th>strong connectivity</th>
+		<th>KosarajuSCC</th>
+	</tr>
+	<tr>
+		<th>all-pairs reachability</th>
+		<th>TransitiveClosure</th>
+	<tr>
+</table>
+Digraph-processing problems addressed in this section
