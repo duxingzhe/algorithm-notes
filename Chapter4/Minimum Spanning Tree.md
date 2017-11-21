@@ -158,7 +158,103 @@ from a set of parallel edges.
 
 ##### Self-loops
 
-We allow self-loops. However, our edges() implementation in
-EdgeWeightedGraph does not include self-loops even though they might be present
-in the input or in the data structure. This omission has no effect on our MST algorithms
-because no MST contains a self-loop.
+We allow self-loops. However, our edges() implementation in EdgeWeightedGraph does not include self-loops even though they might be present in the input or in the data structure. This omission has no effect on our MST algorithms because no MST contains a self-loop.
+
+#### MST API and test client
+
+The MST of a graph G is a subgraph of G that is also a tree, so we have numerous options. Chief among them are
+
+* A list of edges
+* An edge-weighted graph
+* A vertex-indexed array with parent links
+
+##### Test client
+
+A sample client is shown below. It reads edges from the input stream, builds an edge-weighted graph, computes the MST of that graph, prints the MST edges, and prints the total weight of the MST.
+
+#### Prim’s algorithm
+
+Prim’s algorithm is to attach a new edge to a single growing tree at each step. Start with any vertex as a single-vertex tree; then add V-1 edges to it, always taking next (coloring black) the minimumweight edge that connects a vertex on the tree to a vertex not yet on the tree (a crossing edge for the cut defined by tree vertices).
+
+##### Proposition L
+
+Prim’s algorithm computes the MST of any connected edge-weighted graph.
+
+##### Data structures
+
+We implement Prim’s algorithm with the aid of a few simple and familiar data structures. In particular, we represent the vertices on the tree, the edges on the tree, and the crossing edges, as follows:
+
+* Vertices on the tree : We use a vertex-indexed boolean array marked[], where marked[v] is true if v is on the tree.
+* Edges on the tree : We use one of two data structures: a queue mst to collect MST edges or a vertex-indexed array edgeTo[] of Edge objects, where edgeTo[v] is the Edge that connects v to the tree.
+* Crossing edges : We use a MinPQ<Edge> priority queue that compares edges by weight.
+
+##### Maintaining the set of crossing edges
+
+Each time that we add an edge to the tree, we also add a vertex to the tree. To maintain the set of crossing edges, we need to add to the priority queue all edges from that vertex to any non-tree vertex (using marked[] to identify such edges). But we must do more: any edge connecting the vertex just added to a tree vertex that is already on the priority queue now becomes ineligible (it is no longer a crossing edge because it connects two tree vertices). An eager implementation of Prim’s algorithm would remove such edges from the priority queue; we first consider a simpler lazy implementation of the algorithm where we leave such edges on the priority queue, deferring the eligibility test to when we remove them.
+
+##### Implementation
+
+With these preparations, implementing Prim’s algorithm is straightforward, as shown in the implementation LazyPrimMST on the facing page. As with our depth-first search and breadth-first search implementations in the previous two sections, it computes the MST in the constructor so that client methods can learn properties of the MST with query methods.
+
+##### Running time
+
+##### Proposition M
+
+The lazy version of Prim’s algorithm uses space proportional to E and time proportional to ![](http://latex.codecogs.com/gif.latex?ElongE) (in the worst case) to compute the MST of a connected edge-weighted graph with E edges and V vertices.
+
+```
+public class LazyPrimMST {
+
+	private boolean[] marked;
+	private Queue<Edge> mst;
+	private MinPQ<Edge> pq;
+	
+	public LazyPrimMST(EdgeWeightedGraph G) {
+		pq=new MinPQ<Edge>();
+		marked=new boolean[G.V()];
+		mst=new Queue<Edge>();
+		
+		visit(G,0);
+		while(!pq.isEmpty()) {
+			Edge e=pq.delMin();
+			int v=e.either(), w=e.other(v);
+			if(marked[v]&&marked[w])
+				continue;
+			mst.enqueue(e);
+			if(!marked[v])
+				visit(G,v);
+			if(!marked[w])
+				visit(G,w);
+		}
+	}
+	
+	private void visit(EdgeWeightedGrap G) {
+		marked[v]=true;
+		for(Edge e: G.adj(v)) {
+			if(!marked[e.other(v)])
+				pq.insert(e);
+		}
+	}
+	
+	public Iterable<Edge> edges(){
+		return mst;
+	}
+	
+	public double weight()
+}
+```
+
+#### Eager version of Prim’s algorithm
+
+To improve the LazyPrimMST, we might try to delete ineligible edges from the priority queue, so that the priority queue contains only the crossing edges between tree vertices and non-tree vertices. But we can eliminate even more edges. The key is to note that our only interest is in the minimal edge from each non-tree vertex to a tree vertex. When we add a vertex v to the tree, the only possible change with respect to each nontree vertex w is that adding v brings w closer than before to the tree. In short, we do not need to keep on the priority queue all of the edges from w to tree vertices—we just need to keep track of the minimum-weight edge and check whether the addition of v to the tree necessitates that we update that minimum (because of an edge v-w that has lower weight), which we can do as we process each edge in v’s adjacency list.
+
+PrimMST (Algorithm 4.7 on page 622) implements Prim’s algorithm using our index priority queue data type from Section 2.4 (see page 320). It replaces the data structures marked[] and mst[] in LazyPrimMST by two vertex-indexed arrays edgeTo[] and distTo[], which have the following properties:
+
+* If v is not on the tree but has at least one edge connecting it to the tree, then edgeTo[v] is the shortest edge connecting v to the tree, and distTo[v] is the weight of that edge.
+* All such vertices v are maintained on the index priority queue, as an index v associated with the weight of edgeTo[v].
+
+The key implications of these properties is that the minimum key on the priority queue is the weight of the minimal-weight crossing edge, and its associated vertex v is the next to add to the tree.
+
+##### Proposition N
+
+The eager version of P rim’s algorithm uses extra space proportional to V and time proportional to E log V (in the worst case) to compute the MST of a connected edge-weighted graph with E edges and V vertices.
