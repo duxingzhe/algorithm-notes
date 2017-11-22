@@ -255,6 +255,140 @@ PrimMST (Algorithm 4.7 on page 622) implements Prim’s algorithm using our inde
 
 The key implications of these properties is that the minimum key on the priority queue is the weight of the minimal-weight crossing edge, and its associated vertex v is the next to add to the tree.
 
+```
+public class PrimMST {
+	private Edge[] edgeTo;
+	private double[] distTo;
+	private boolean[] marked;
+	private IndexMinPQ<Double> pq;
+	
+	public PrimMST(EdgeWeightedGraph G) {
+		edgeTo=new Edge[G.V()];
+		distTo=new double[G.V()];
+		marked=new boolean[G.V()];
+		for(int v=0;v<G.V();v++) {
+			distTo[v]=Double.POSITIVE_INFINITY;
+		}
+		pq=new IndexMinPQ<Double>(G.V());
+		
+		distTo[0]=0.0;
+		pq.insert(0,0.0);
+		while(!pq.isEmpty()) {
+			visit(G, pq.delMin());
+		}
+	}
+	
+	private void visit(EdgeWeightedGraph G) {
+		marked[v]=true;
+		for(Edge e:G.adj(v)) {
+			int w=e.other(v);
+			if(marked[w])
+				continue;
+			if(e.weight()<distTo[w]) {
+				edgeTo[w]=e;
+				distTo[w]=e.weight();
+				if(pq.contains(w))
+					pq.change(w,distTo[w]);
+				else
+					pq.insert(w,distTo[w]);
+			}
+		}
+	}
+	
+	public Iterable<Edge> edges()
+	public double weight()
+}
+```
+
 ##### Proposition N
 
 The eager version of P rim’s algorithm uses extra space proportional to V and time proportional to E log V (in the worst case) to compute the MST of a connected edge-weighted graph with E edges and V vertices.
+
+#### Kruskal’s algorithm
+
+The second MST algorithm that we consider in detail is to process the edges in order of their weight values (smallest to largest), taking for the MST (coloring black) each edge that does not form a cycle with edges previously added, stopping after adding V-1 edges have been taken. The black edges form a forest of trees that evolves gradually into a single tree, the MST.
+
+##### Proposition O
+
+Kruskal’s algorithm computes the MST of any edge-weighted connected graph.
+
+##### Proposition N (continued)
+
+Kruskal’s algorithm uses space proportional to E and time proportional to ![](http://latex.codecogs.com/gif.latex?ElongE) (in the worst case) to compute the MST of an edgeweighted connected graph with E edges and V vertices.
+
+```
+public class KruskalMST {
+	private Queue<Edge> mst;
+	
+	public KruskalMST(EdgeWeightedGraph G) {
+		mst=new Queue<Edge>();
+		MinPQ<Edge> pq=new MinPQ<Edge>(G.edges());
+		UF uf=new UF(G.V());
+		
+		while(!pq.isEmpty()&&mst.size()<G.V()-1) {
+			Edge e=pq.delMin();
+			int v=e.either(),w=e.other(v);
+			if(uf.connected(v,w))
+				continue;
+			uf.union(v,w);
+			mst.enqueue(e);
+		}
+	}
+	
+	public Iterable<Edge> edges(){
+		return mst;
+	}
+	
+	public double weight()
+}
+```
+
+#### Perspective
+
+The MST problem is one of the most heavily studied problems that we encounter in this book. Basic approaches to solving it were invented long before the development of modern data structures and modern techniques for analyzing the performance of algorithms, at a time when finding the MST of a graph that contained, say, thousands of edges was a daunting task.
+
+<table>
+    <tr>
+        <th rowspan="2">algorithm</th>
+        <th colspan="2">worst-case cost(after N inserts)</th></th>
+    </tr>
+    <tr>
+        <th>space</th>
+        <th>time</th>
+    </tr>
+    <tr>
+        <th>lazyPrim</th>
+        <th>E</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?ElogE></img>
+    </tr>
+    <tr>
+        <th>eager Prim</th>
+        <th>V</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?ElogV></th>
+    </tr>
+	<tr>
+        <th>Kruskal</th>
+        <th>E</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?ElogE></th>
+    </tr>
+	<tr>
+        <th>Fredman-Tarjan</th>
+        <th>V</th>
+        <th><img src=http://latex.codecogs.com/gif.latex?E+VlogV></th>
+    </tr>
+	<tr>
+        <th>Chazelle</th>
+        <th>V</th>
+        <th>very, very nearly, but not quite E</th>
+    </tr>
+	<tr>
+        <th>impossible?</th>
+        <th>V</th>
+        <th>E?</th>
+    </tr>
+</table>
+Performance characteristics of MST algorithms
+
+##### A linear-time algorithm?
+
+On the one hand, no theoretical results have been developed that deny the existence of an MST algorithm that is guaranteed to run in linear time for all graphs. On the other hand, the goal of developing algorithms for computing the MST of sparse graphs in linear time remains elusive.
