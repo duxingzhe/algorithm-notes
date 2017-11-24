@@ -203,3 +203,102 @@ public Iterable<DirectedEdge> pathTo(int v){
     return path;
 }
 ```
+
+#### Theoretical basis for shortest-paths algorithms
+
+Edge relaxation is an easy-to-implement fundamental operation that provides a practical basis for our shortestpaths implementations. It also provides a theoretical basis for understanding the algorithms and an opportunity for us to do our algorithm correctness proofs at the outset.
+
+##### Optimality conditions
+
+##### Proposition P ( Shortest-paths optimality conditions)
+
+Let G be an edge-weighted digraph, with s a source vertex in G and distTo[] a vertex-indexed array of path lengths in G such that, for all v reachable from s, the value of distTo[v] is the length of some path from s to v with distTo[v] equal to infinity for all v not reachable from s. These values are the lengths of shortest paths if and only if they satisfy distTo[w] <= distTo[v] + e.weight() for each edge e from v to w (or, in other words, no edge is eligible).
+
+##### Certification
+
+An important practical consequence of Proposition P is its applicability to certification.
+
+##### Generic algorithm
+
+The optimality conditions lead immediately to a generic algorithm that encompasses all of the shortest-paths algorithms that we consider. For the moment, we restrict attention to nonnegative weights.
+
+##### Proposition Q ( Generic shortest-paths algorithm)
+
+Initialize distTo[s] to 0 and all other distTo[] values to infinity, and proceed as follows:
+
+Relax any edge in G, continuing until no edge is eligible.
+
+For all vertices w reachable from s, the value of distTo[w] after this computation
+is the length of a shortest path from s to w (and the value of edgeTo[] is the last
+edge on that path).
+
+#### Dijkstra’s algorithm
+
+Dijkstra’s algorithm is an analogous scheme to compute an SPT. We begin by initializing dist[s] to 0 and all other distTo[] entries to positive infinity, then we relax and add to the tree a non-tree vertex with the lowest distTo[] value, continuing until all vertices are on the tree or no non-tree vertex has a finite distTo[] value.
+
+##### Proposition R
+
+Dijkstra’s algorithm solves the single-source shortest-paths problem in edge-weighted digraphs with nonnegative weights.
+
+##### Data structures
+
+To implement Dijkstra’s algorithm we add to our distTo[] and edgeTo[] data structures an index priority queue pq to keep track of vertices that are candidates for being the next to be relaxed. Recall that an IndexMinPQ allows us to associate indices with keys (priorities) and to remove and return the index corresponding to the lowest key.
+
+##### Alternative viewpoint
+
+Another way to understand the dynamics of the algorithm derives from the proof, diagrammed at left: we have the invariant that distTo[] entries for tree vertices are shortest-paths distances and for each vertex w on the priority queue, distTo[w] is the weight of a shortest path from s to w that uses only intermediate vertices in the tree and ends in the crossing edge edgeTo[w]. The distTo[] entry for the vertex with the smallest priority is a shortestpath weight, not smaller than the shortest-path weight to any vertex already relaxed, and not larger than the shortest-path weight to any vertex not yet relaxed. That vertex is next to be relaxed. Reachable vertices are relaxed in order of the weight of their shortest path from s.
+
+##### Variants
+
+Our implementation of Dijkstra’s algorithm, with suitable modifications, is effective for solving other versions of the problem, such as the following:
+
+Single-source shortest paths in undirected graphs. Given an edge-weighted undirected graph and a source vertex s, support queries of the form Is there a path from s to a given target vertex v? If so, find a shortest such path (one whose total weight is minimal).
+
+```
+public class DijkstraSP {
+
+	private DirectedEdge[] edgeTo;
+	private double[] distTo;
+	private IndexMinPQ<Double> pq;
+	
+	public DijkstraSP(EdgeWeightedDigraph G,int s) {
+		edgeTo=new DirectedEdge[G.V()];
+		distTo=new double[G.V()];
+		pq=new IndexMinPQ<Double>(G.V());
+		
+		for(int v=0;v<G.V();v++) {
+			distTo[v]=Double.POSITIVE_INFINITY;
+		}
+		distTo[s]=0.0;
+		while(!pq.isEmpty()) {
+			relax(G,pq.delMin());
+		}
+	}
+	
+	private void relax(EdgeWeightedDigraph G, int v) {
+		for(DirectedEdge e: G.adj(v)) {
+			int w=e.to();
+			if(distTo[w]>distTo[v]+e.weight()) {
+				distTo[w]=distTo[v]+e.weight();
+				edgeTo[w]=e;
+				if(pq.contains(w))
+					pq.change(w,distTo[w]);
+				else
+					pq.insert(w,distTo[w]);
+			}
+		}
+		
+	}
+	
+	public double distTo(int v)
+	public boolean hasPathTo(int v)
+	public Iterable<Edge> pathTo(int v)
+}
+```
+
+Source-sink shortest paths. Given an edge-weighted digraph, a source vertex s, and a target vertex t, find the shortest path from s to t.
+
+All-pairs shortest paths. Given an edge-weighted digraph, support queries of the form Given a source vertex s and a target vertex t, is there a path from s to t? If so, find a shortest such path (one whose total weight is minimal).
+
+Shortest paths in Euclidean graphs. Solve the single-source, source-sink, and all-pairs shortest-paths problems in graphs where vertices are points in the plane and edge weights are proportional to Euclidean distances between vertices.
+
