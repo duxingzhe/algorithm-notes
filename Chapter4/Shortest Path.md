@@ -302,3 +302,109 @@ All-pairs shortest paths. Given an edge-weighted digraph, support queries of the
 
 Shortest paths in Euclidean graphs. Solve the single-source, source-sink, and all-pairs shortest-paths problems in graphs where vertices are points in the plane and edge weights are proportional to Euclidean distances between vertices.
 
+#### Acyclic edge-weighted digraphs
+
+For many natural applications, edge-weighted digraphs are known to have no directed cycles. For economy, we use the equivalent term edge-weighted DAG to refer to an acyclic edge-weighted digraph. We now consider an algorithm for finding shortest paths that is simpler and faster than Dijkstra’s algorithm for edge-weighted DAGs. Specifically, it
+
+* Solves the single-source problem in linear time
+* Handles negative edge weights
+* Solves related problems, such as finding longest paths.
+
+Proposition S
+
+By relaxing vertices in t opological order, we can solve the single-source shortest-paths problem for edge-weighted DAGs in time proportional to E + V.
+
+```
+public class AcyclicSP {
+
+	private DirectedEdge[] edgeTo;
+	private double[] distTo;
+	
+	public AcyclicSP(EdgeWeightedDigraph G, int s) {
+		edgeTo=new DirectedEdge[G.v()];
+		distTo-new double[G.V()];
+		
+		for(int v=0;v<G.V();v++) {
+			distTo[v]=Double.POSITIVE_INFINITY;
+		}
+		distTo[s]=0.0;
+		
+		Topological top=new Topological(G);
+		
+		for(int v:top.order()) {
+			relax(G,v);
+		}
+		
+	}
+	
+	private void relax(EdgeWeightedDigraph G, int v)
+	
+	public double disTo(int v)
+	public boolean distTo(int v)
+	public Iterable<Edge> pathTo(int v)
+}
+```
+
+##### Longest paths
+
+Consider the problem of finding the longest path in an edge-weighted DAG with edge weights that may be positive or negative.
+
+Single-source longest paths in edge-weighted DAGs. Given an edge-weighted DAG (with negative weights allowed) and a source vertex s, support queries of the form: Is there a directed path from s to a given target vertex v? If so, find a longest such path (one whose total weight is maximal).
+
+##### Proposition T
+
+We can solve the longest-paths problem in edge-weighted DAGs in time proportional to E + V.
+
+##### Parallel job scheduling
+
+As an example application, we revisit the class of scheduling problems that we first considered in Section 4.2 (page 574). Specifically, consider the following scheduling problem (differences from the problem on page 575 are italicized):
+
+Parallel precedence-constrained scheduling. Given a set of jobs of specified duration to be completed, with precedence constraints that specify that certain jobs have to be completed before certain other jobs are begun, how can we schedule the jobs on identical processors (as many as needed ) such that they are all completed in the minimum amount of time while still respecting the constraints?
+
+##### Definition
+
+The critical path method for parallel scheduling is to proceed as follows: Create an edge-weighted DAG with a source s, a sink t, and two vertices for each job (a start vertex and an end vertex). For each job, add an edge from its start vertex to its end vertex with weight equal to its duration. For each precedence constraint v->w, add a zero-weight edge from the end vertex corresponding tovs to the beginning vertex corresponding to w. Also add zero-weight edges from the source to each job’s start vertex and from each job’s end vertex to the sink. Now, schedule each job at the time given by the length of its longest path from the source.
+
+```
+public class CPM {
+
+	public static void main(String[] args) {
+		int N=StdIn.readInt();
+		StdIn.readLine();
+		G=new EdgeWeightedDigraph(2*N+2);
+		
+		int s=2*N, t=2*N+1;
+		for(int i=0;i<N;i++) {
+			String[] a=StdIn.readLine().split("\\s+");
+			double duration=Double.parseDouble(a[0]);
+			G.addEdge(new DirectedEdge(i,i+N,duration));
+			G.addEdge(new DirectedEdge(s,i,0.0));
+			G.addEdge(new DirectedEdge(i+N,t,0.0));
+			for(int j=1;j<a.length;j++) {
+				int successor=Integer.parseInt(a[j]);
+				G.addEdge(new DirectedEdge(i+N,successor,0.0));
+			}
+			
+			AcyclicLP lp=new AcyclicLP(G, s);
+			
+			StdOut.println("Start times: ");
+			for(int i=0;i<N;i++) {
+				StdOut.printf("%4d: %5.1f\n",i,lp.distTo(i));
+			}
+			StdOut.printf("Finish time: %5.1f\n",lp.distTo(t));
+		}
+	}
+}
+```
+
+##### Proposition U
+
+The critical path method solves the parallel precedence-constrained scheduling problem in linear time.
+
+##### Parallel job scheduling with relative deadlines
+
+Conventional deadlines are relative to the start time of the first job. Suppose that we allow an additional type of constraint in the job-scheduling problem to specify that a job must begin before a specified amount of time has elapsed, relative to the start time of another job. Such constraints are commonly needed in time-critical manufacturing processes and in many other applications, but they can make the job-scheduling problem considerably more difficult to solve.
+
+##### Proposition V
+
+Parallel job scheduling with relative deadlines is a shortest-paths problem in edge-weighted digraphs (with cycles and negative weights allowed).
