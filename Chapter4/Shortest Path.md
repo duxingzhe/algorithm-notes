@@ -408,3 +408,132 @@ Conventional deadlines are relative to the start time of the first job. Suppose 
 ##### Proposition V
 
 Parallel job scheduling with relative deadlines is a shortest-paths problem in edge-weighted digraphs (with cycles and negative weights allowed).
+
+#### Shortest paths in general edge-weighted digraphs
+
+Our job-schedulingwith-deadlines example just discussed demonstrates that negative weights are not merely a mathematical curiosity; on the contrary, they significantly extend the applicability of the shortest-paths problem as a problem-solving model. Accordingly we now consider algorithms for edge-weighted digraphs that may have both cycles and negative weights.
+
+##### Strawman I
+
+The first idea that suggests itself is to find the smallest (most negative) edge weight, then to add the absolute value of that number to all the edge weights to transform the digraph into one with no negative weights. This naive approach does not work at all, because shortest paths in the new digraph bear little relation to shortest paths in the old one. The more edges a path has, the more it is penalized by this transformation.
+
+##### Strawman II
+
+The second idea that suggests itself is to try to adapt Dijkstra’s algorithm in some way. The fundamental difficulty with this approach is that the algorithm depends on examining paths in increasing order of their distance from the source. The proof in Proposition R that the algorithm is correct assumes that adding an edge to a path makes that path longer. But any edge with negative weight makes the path shorter, so that assumption is unfounded.
+
+##### Negative cycles
+
+When we consider digraphs that could have negative edge weights, the concept of a shortest path is meaningless if there is a cycle has negative weight.
+
+##### Definition
+
+A negative cycle in an edgeweighted digraph is a directed cycle whose total weight (sum of the weights of its edges) is negative.
+
+##### Proposition W
+
+There exists a shortest path from s to v in an edge-weighted digraph if and only if there exists at least one directed path from s to v and no vertex on any directed path from s to v is on a negative cycle.
+
+##### Strawman III
+
+Whether or not there are negative cycles, there exists a shortest simple path connecting the source to each vertex reachable from the source. Why not define shortest paths so that we seek such paths? Unfortunately, the best known algorithm for solving this problem takes exponential time in the worst case (see Chapter 6).
+
+A well-posed and tractable version of the shortest paths problem in edgeweighted digraphs is to require algorithms to
+
+* Assign a shortest-path weight of ![](http://latex.codecogs.com/gif.latex?+\infty) to vertices that are not reachable from the
+source
+* Assign a shortest-path weight of ![](http://latex.codecogs.com/gif.latex?-\infty) to vertices that are on a path from the source that has a vertex that is on a negative cycle
+* Compute the shortest-path weight (and tree) for all other vertices
+
+We now adopt these less stringent restrictions and focus on the following problems in general digraphs:
+
+Negative cycle detection. Does a given edge-weighted digraph have a negative cycle? If it does, find one such cycle.
+Single-source shortest paths when negative cycles are not reachable. Given an edge-weighted digraph and a source s with no negative cycles reachable from s, support queries of the form Is there a directed path from s to a given target vertex v? If so, find a shortest such path (one whose total weight is minimal).
+
+To summarize: while shortest paths in digraphs with directed cycles is an ill-posed problem and we cannot efficiently solve the problem of finding simple shortest paths in such digraphs, we can identify negative cycles in practical situations.
+
+##### Proposition X (Bellman-Ford algorithm)
+
+The following method solves the singlesource shortest-paths problem from a given source s for any edge-weighted digraph with V vertices and no negative cycles reachable from s: Initialize distTo[s] to 0 and all other distTo[] values to infinity. Then, considering the digraph’s edges in any order, relax all edges. Make V such passes.
+
+##### Proposition W (continued)
+
+The Bellman-Ford algorithm takes time proportional to EV and extra space proportional to V.
+
+##### Queue-based Bellman-Ford
+
+Specifically, we can easily determine a priori that numerous edges are not going to lead to a successful relaxation in any given pass: the only edges that could lead to a change in distTo[] are those leaving a vertex whose distTo[] value changed in the previous pass. To keep track of such vertices, we use a FIFO queue.
+
+##### Implementation
+
+Implementing the Bellman-Ford algorithm along these lines requires remarkably little code, as shown in Algorithm 4.11. It is based on two additional data structures:
+
+* A queue q of vertices to be relaxed
+* A vertex-indexed boolean array onQ[] that indicates which vertices are on the queue, to avoid duplicates
+
+To add vertices to the queue, we augement our relax() implementation from page 646 to put the vertex pointed to by any edge that successfully relaxes onto the queue, as shown in the code at right. The data structures ensure that
+
+* Only one copy of each vertex appears on the queue
+* Every vertex whose edgeTo[] and distTo[] values change in some pass is processed in the next pass
+
+```
+private void relax(EdgeWeightedDigraph G, int v) {
+	for(DirectedEdge e:G.adj(v)) {
+		int w=e.to();
+		if(distTo[w]>distTo[v]+e.weight()) {
+			distTo[w]=distTo[v]+e.weight();
+			edgeTo[w]=e;
+			if(!onQ[w]) {
+				q.enqueue(w);
+				onQ[w]=true;
+			}
+		}
+		if(cost++%G.V()==0) {
+			findNegativeCycle();
+		}
+	}
+}
+```
+
+##### Proposition Y
+
+The queue-based implementation of the Bellman-Ford algorithm solves the shortest-paths problem from a given source s (or finds a negative cycle reachable from s) for any edge-weighted digraph with V vertices, in time proportional to EV and extra space proportional to V, in the worst case.
+
+```
+public class BellmanFordSP {
+
+	private double[] distTo;
+	private DirectedEdge[] edgeTo;
+	private boolean[] onQ;
+	private Queue<Integer> queue;
+	private int cost;
+	private Iterable<DirectedEdge> cycle;
+	
+	public BellmanFordSP(EdgeWeightedDigraph G, int s) {
+		distTo=new double[G.V()];
+		edgeTo=new DirectedEdge[G.V()];
+		onQ=new boolean[G.V()];
+		queue=new Queue<Integer>();
+		for(int v=0;v<G.V();v++) {
+			distTo[v]=Double.POSITIVE_INFINITY;
+		}
+		distTo[s]=0.0;
+		queue.enqueue(s);
+		onQ[s]=true;
+		while(!queue.isEmpty()&&!this.hasNegativeCycle()) {
+			int v=queue.dequeue();
+			onQ[v]=false;
+			relax(v);
+		}
+	}
+	
+	private void relax(int v)
+	
+	public double distTo(int v)
+	public boolean hasPathTo(int v)
+	public Iterable<Edge> pathTo(int v)
+	
+	private void findNegativeCycle()
+	public boolean hasNegativeCycle()
+	public Iterable<Edge> negativeCycle()
+}
+```
