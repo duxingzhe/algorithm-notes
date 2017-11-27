@@ -556,7 +556,7 @@ public class Arbitrage {
 
 	public static void main(String[] args) {
 		int V=StdIn.readInt();
-		String[] name=new Sting[V];
+		String[] name=new String[V];
 		EdgeWeightedDigraph G=new EdgeWeightedDigraph(V);
 		for(int v=0;v<V;v++) {
 			name[v]=StdIn.readString();
