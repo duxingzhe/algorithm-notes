@@ -537,3 +537,90 @@ public class BellmanFordSP {
 	public Iterable<Edge> negativeCycle()
 }
 ```
+
+##### Negative cycle detection
+
+We amortize the cost of this check by
+
+* Adding an instance variable cycle and a private method findNegativeCycle() that sets cycle to an iterator for the edges of a negative cycle if one is found (and to null if none is found)
+* Calling findNegativeCycle() every Vth call to relax()
+
+This approach ensures that the loop in the constructor terminates.
+
+##### Arbitrage
+
+Consider a market for financial transactions that is based on trading commodities.
+
+```
+public class Arbitrage {
+
+	public static void main(String[] args) {
+		int V=StdIn.readInt();
+		String[] name=new Sting[V];
+		EdgeWeightedDigraph G=new EdgeWeightedDigraph(V);
+		for(int v=0;v<V;v++) {
+			name[v]=StdIn.readString();
+			for(int w=0;w<V;w++) {
+				double rate=StdIn.readDouble();
+				DirectedEdge e=new DirectedEdge(v,w,-Math.log(rate));
+				G.addEdge(e);
+			}
+		}
+		
+		BellmanFordSP spt=new BellmanFordSP(G,0);
+		if(spt.hasNegativeCycle()) {
+			double stake=1000.0;
+			for(DirectedEdge e: spt.negativeCycle()) {
+				StdOut.printf("%10.5f %s",stake,name[e.from()]);
+				stake*=Math.exp(-e.weight());
+				StdOut.printf("= %10.5f %s\n",stake,name[e.to()]);
+			}
+		}
+		else
+			StdOut.println("No arbitrage opportunity");
+	}
+}
+```
+
+##### Proposition Z
+
+The arbitrage problem is a negative-cycle-detection problem in edge-weighted digraphs.
+
+#### Perspective
+
+The table below summarizes the important characteristics of the shortest-paths algorithms that we have considered in this section. The first reason to choose among the algorithms has to do with basic properties of the digraph at hand.
+
+<table>
+    <tr>
+        <th rowspan="2">algorithm</th>
+		<th rowspan="2">restriction</th>
+        <th colspan="2">worst-case cost(after N inserts)</th></th>
+		<th rowspan="2">extra space</th>
+		<th rowspan="2">sweet spot</th>
+    </tr>
+    <tr>
+        <th>Dijkstra(eager)</th>
+        <th>positive edge weights</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?ElogV></img>
+		<th><img src=http://latex.codecogs.com/gif.latex?ElogV></img>
+		<th>V</img>
+		<th>worst-case guarantee</img></th>
+    </tr>
+    <tr>
+        <th>topological sort</th>
+        <th>edge-weighted DAGs</th>
+		<th>E+V</th>
+		<th>E+V</th>
+		<th>V</th>
+		<th>optimal for acyclic</th>
+    </tr>
+    <tr>
+        <th>Bellman-Ford(queue-based)</th>
+        <th>no negative cycles</th>
+        <th>E+V</th>
+		<th>VE</th>
+		<th>V</th>
+		<th>widely applicable</th>
+    </tr>
+</table>
+Performance characteristics of shortest-paths algorithms
