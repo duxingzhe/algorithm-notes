@@ -95,5 +95,70 @@ Despite the advantages of using a data type such as Alphabet in string-processin
 
 * The preponderance of clients just use String
 * Conversion to and from indices tends to fall in the inner loop and slow down implementations considerably
-* The code is more complicated, and therefore more diffi cult to understand
+* The code is more complicated, and therefore more difficult to understand
+
+### String Sorts
+
+#### Key-indexed counting
+
+As a warmup, we consider a simple method for sorting that is effective whenever the keys are small integers. This method, known as key-indexed counting, is useful in its own right and is also the basis for two of the three string sorts that we consider in this section.
+
+##### Compute frequency counts
+
+The first step is to count the frequency of occurrence of each key value, using an int array count[].
+
+##### Transform counts to indices
+
+Next, we use count[] to compute, for each key value, the starting index positions in the sorted order of items with that key. In our example, since there are three items with key 1 and five items with key 2, then the items with key 3 start at position 8 in the sorted array. In general, to get the starting index for items with any given key value we sum the frequency counts of smaller values. For each key value r, the sum of the counts for key values less than r+1 is equal to the sum of the counts for key values less than r plus count[r], so it is easy to proceed from left to right to transform count[] into an index table that we can use to sort the data.
+
+##### Distribute the data
+
+With the count[] array transformed into an index table, we accomplish the actual sort by moving the items to an auxiliary array aux[]. We move each item to the position in aux[] indicated by the count[] entry corresponding to its key, and then increment that entry to maintain the following invariant for count[]: for each key value r, count[r] is the index of the position in aux[] where the next item with key value r (if any) should be placed. This process produces a sorted result with one pass through the data, as illustrated at left. Note : In one of our applications, the fact that this implementation is stable is critical: items with equal keys are brought together but kept in the same relative order.
+
+##### Copy back
+
+Since we accomplished the sort by moving the items to an auxiliary array, the last step is to copy the sorted result back to the original array. 
+
+##### Proposition A
+
+Key-indexed counting uses 8N+3R+1 array accesses to stably sort N items whose keys are integers between 0 and R+1.
+
+#### LSD string sort
+
+The first string-sorting method that we consider is known as least-significant-digit first (LSD) string sort. Consider the following motivating application: Suppose that a highway engineer sets up a device that records the license plate numbers of all vehicles using a busy highway for a given period of time and wants to know the number of different vehicles that used the highway.
+
+##### Proposition B
+
+LSD string sort stably sorts fixed-length strings.
+
+```
+public class LSD {
+
+	public static void sort(String[] a, int W) {
+		int N=a.length;
+		int R=256;
+		String[] aux=new String[N];
+		
+		for(int d=W-1;d>=0;d--) {
+			int[] count=new int[R+1];
+			for(int i=0;i<N;i++) {
+				count[a[i].charAt(d)+1]++;
+			}
+			for(int r=0;r<R;r++) {
+				count[r+1]+=count[r];
+			}
+			for(int i=0;i<N;i++) {
+				aux[count[a[i].charAt(d)]++]=a[i];
+			}
+			for(int i=0;i<N;i++) {
+				a[i]=aux[i];
+			}
+		}
+	}
+}
+```
+
+##### Proposition B (continued)
+
+LSD string sort uses ~7WN+3WR array accesses and extra space proportional to N+R to sort N items whose keys are W-character strings taken from an R-character alphabet.
 
