@@ -162,3 +162,101 @@ public class LSD {
 
 LSD string sort uses ~7WN+3WR array accesses and extra space proportional to N+R to sort N items whose keys are W-character strings taken from an R-character alphabet.
 
+#### MSD string sort
+
+To implement a general-purpose string sort, where strings are not necessarily all the same length, we consider the characters in left-to-right order. We know that strings that start with a should appear before strings that start with b, and so forth. The natural way to implement this idea is a recursive method known as most-significant-digit-first (MSD) string sort. We use key-indexed counting to sort the strings according to their first character, then (recursively) sort the subarrays corresponding to each character (excluding the first character, which we know to be the same for each string in each subarray).
+
+##### End-of-string convention
+
+We need to pay particular attention to reaching the ends of strings in MSD string sort. For a proper sort, we need the subarray for strings whose characters have all been examined to appear as the first subarray, and we do not want to recursively sort this subarray.
+
+##### Specified alphabet
+
+The cost of MSD string sort depends strongly on the number of possible characters in the alphabet. It is easy to modify our sort method to take an Alphabet as argument, to allow for improved efficiency in clients involving strings taken from relatively small alphabets. The following changes will do the job:
+
+* Save the alphabet in an instance variable alpha in the constructor.
+* Set R to alpha.R() in the constructor.
+* Replace s.charAt(d) with alpha.toIndex(s.charAt(d)) in charAt().
+
+```
+public class MSD {
+	
+	private static int R=256;
+	private static final int M=15;
+	private static String[] aux;
+	
+	private static int charAt(String s, int d) {
+		if(d<s.length())
+			return s.charAt(d);
+		else
+			return -1;
+	}
+	
+	public static void sort(String[] a) {
+		int N=a.length;
+		aux=new String[N];
+		sort(a,0,N-1,0);
+	}
+	
+	private static void sort(String[] a, int low, int high, int d) {
+		if(high<=low+M) {
+			Insertion.sort(a,low,high,d);
+		}
+		
+		int[] count=new int[R+2];
+		for(int i=low;i<=high;i++) {
+			count[charAt(a[i],d)+2]++;
+		}
+		for(int r=0;r<R+1;r++) {
+			count[r+1]+=count[r];
+		}
+		for(int i=low;i<=high;i++) {
+			aux[count[charAt(a[i],d)+1]++]=a[i];
+		}
+		for(int i=low;i<=high;i++) {
+			a[i]=aux[i-low];
+		}
+		for(int r=0;r<R;r++) {
+			sort(a,low+count[r],low+count[r+1]-1,d+1);
+		}
+	}
+
+}
+```
+
+##### Small subarrays
+
+The basic idea behind MSD string sort is quite effective: in typical applications, the strings will be in order after examining only a few characters in the key. Put another way, the method quickly divides the array to be sorted into small subarrays.
+
+##### Equal keys
+
+A second pitfall for MSD string sort is that it can be relatively slow for subarrays containing large numbers of equal keys.
+
+##### Extra space
+
+To do the partitioning, MSD uses two auxiliary arrays: the temporary array for distributing keys (aux[]) and the array that holds the counts that are transformed into partition indices (count[]).
+
+##### Random string model
+
+To study the performance of MSD string sort, we use a random string model, where each string consists of (independently) random characters, with no bound on their length.
+
+##### Performance
+
+The running time of MSD string sort depends on the data. For comparebased methods, we were primarily concerned with the order of the keys; for MSD string sort, the order of the keys is immaterial, but we are concerned with the values of the keys.
+
+* For random inputs, MSD string sort examines just enough characters to distinguish among the keys, and the running time is sublinear in the number of characters in the data (it examines a small fraction of the input characters).
+* For nonrandom inputs, MSD string sort still could be sublinear but might need to examine more characters than in the random case, depending on the data. In particular, it has to examine all the characters in equla keys, so the running time is nearly linear in the number of characters in the data when significant numbers of equal keys are present.
+* In the worst case, MSD string sort examines all the characters in the keys, so the running time is linear in the number of characters in the data (like LSD string sort). A worst-case input is one with all strings equal.
+
+##### Proposition C
+
+To sort N random strings from an R-character alphabet, MSD string sort examines about ![](http://latex.codecogs.com/gif.latex?Nlong_{R}N) characters, on average.
+
+##### Proposition D
+
+MSD string sort uses between 8N+3R and ~7wN+3WR array accesses to sort N strings taken from an R-character alphabet, where w is the average string length.
+
+##### Proposition D (continued)
+
+To sort N strings taken from an R-character alphabet, the amount of space needed by MSD string sort is proportional to R times the length of the longest string (plus N ), in the worst case.
+

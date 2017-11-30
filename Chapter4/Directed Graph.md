@@ -75,7 +75,7 @@ Digraph also adds to the API a method reverse() which returns a copy of the digr
 ##### Symbolic names
 
 It is also a simple matter to allow clients to use symbolic names in
-digraph applications. To implement a class SymbolDigraph like  SymbolGraph on page 552, replace Graph by Digraph everywhere.
+digraph applications. To implement a class SymbolDigraph like SymbolGraph on page 552, replace Graph by Digraph everywhere.
 
 ```
 public class Digraph {
