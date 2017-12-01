@@ -258,5 +258,107 @@ MSD string sort uses between 8N+3R and ~7wN+3WR array accesses to sort N strings
 
 ##### Proposition D (continued)
 
-To sort N strings taken from an R-character alphabet, the amount of space needed by MSD string sort is proportional to R times the length of the longest string (plus N ), in the worst case.
+To sort N strings taken from an R-character alphabet, the amount of space needed by MSD string sort is proportional to R times the length of the longest string (plus N), in the worst case.
 
+#### Three-way string quicksort
+
+We can also adapt quicksort to MSD string sorting by using 3-way partitioning on the leading character of the keys, moving to the next character on only the middle subarray (keys with leading character equal to the partitioning character).
+
+##### Small subarrays
+
+In any recursive algorithm, we can gain efficiency by treating small subarrays differently. In this case, we use the insertion sort from page 715, which skips the characters that are known to be equal. The improvement due to this change is likely to be significant, though not nearly as important as for MSD string sort.
+
+##### Restricted alphabet
+
+To handle specialized alphabets, we could add an Alphabet argument alpha to each of the methods and replace s.charAt(d) with alpha.toIndex(s.charAt(d)) in charAt(). In this case, there is no benefit to doing so, and adding this code is likely to substantially slow the algorithm down because this code is in the inner loop.
+
+##### Randomization
+
+As with any quicksort, it is generally worthwhile to shuffle the array beforehand or to use a random paritioning item by swapping the first item with a random one. The primary reason to do so is to protect against worst-case performance in the case that the array is already sorted or nearly sorted.
+
+##### Performance
+
+Consider a case where the string keys are long (and are all the same length, for simplicity), but most of the leading characters are equal. In such a situation, the running time of standard quicksort is proportional to the string length times 2N ln N, whereas the running time of 3-way string quicksort is proportional to N times the string length (to discover all the leading equal characters) plus ![](http://latex.codecogs.com/gif.latex?2NlnN) character comparisons (to do the sort on the remaining short keys). That is, 3-way string quicksort requires up to a factor of 2 ln N fewer character compares than normal quicksort. It is not unusual for keys in practical sorting applications to have characteristics similar to this artificial example.
+
+##### Proposition E
+
+To sort an array of N random strings, 3-way string quicksort uses ~![](http://latex.codecogs.com/gif.latex?2NlnN) character compares, on the average.
+
+##### Example: web logs
+
+As an example where 3-way string quicksort shines, we can consider a typical modern data-processing task. Suppose that you have built a website and want to analyze the traffic that it generates. You can have your system administrator supply you with a web log of all transactions on your site. Among the information associated with a transaction is the domain name of the originating machine.
+
+#### Which string-sorting algorithm should I use?
+
+Naturally, we are interested in how the string-sorting methods that we have considered compare to the general-purpose methods that we considered in Chapter 2. The following table summarizes the important characteristics of the string-sort algorithms that we have discussed in this section (the rows for quicksort, mergesort, and 3-way quicksort are included from Chapter 2, for comparison).
+
+<table>
+    <tr>
+        <th rowspan="2">algorithm</th>
+		<th rowspan="2">stable?</th>
+		<th rowspan="2">inplace?</th>
+        <th colspan="2">order of growth of typical number calls to charAt() to sort N strings from an R-character alphabet (average length w, max length W)</th>
+		<th rowspan="2">sweet spot</th>
+    </tr>
+    <tr>
+        <th>running time</th>
+        <th>extra space</th>
+    </tr>
+    <tr>
+        <th>insertion sort for strings</th>
+        <th>yes</th>
+		<th>yes</th>
+		<th>between N and <img src=http://latex.codecogs.com/gif.latex?N^2></img></th>
+		<th>1</th>
+		<th>small arrays, arrays in order</th>
+    </tr>
+    <tr>
+        <th>quicksort</th>
+        <th>no</th>
+		<th>yes</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?Nlog^{2}N></img></th>
+		<th><img src=http://latex.codecogs.com/gif.latex?logN></img></th>
+		<th>gernal-purpose when space is tight</th>
+    </tr>
+	<tr>
+        <th>mergesort</th>
+        <th>yes</th>
+		<th>no</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?Nlog^{2}N></img></th>
+		<th><img src=http://latex.codecogs.com/gif.latex?logN></img></th>
+		<th>gernal-purpose stable sort</th>
+    </tr>
+	<tr>
+        <th>3-way quicksort</th>
+        <th>no</th>
+		<th>yes</th>
+		<th>between N and <img src=http://latex.codecogs.com/gif.latex?NlogN></img></th>
+		<th><img src=http://latex.codecogs.com/gif.latex?logN></img></th>
+		<th>large numbers of equal keys</th>
+    </tr>
+	<tr>
+        <th>LSD string sort</th>
+        <th>yes</th>
+		<th>no</th>
+		<th>NW</th>
+		<th>N</th>
+		<th>short fixed-length strings</th>
+    </tr>
+	<tr>
+        <th>MSD string sort</th>
+        <th>yes</th>
+		<th>no</th>
+		<th>between N and Nw</th>
+		<th>N+WR</th>
+		<th>random strings</th>
+    </tr>
+	<tr>
+        <th>3-way string quicksort</th>
+        <th>no</th>
+		<th>yes</th>
+		<th>between N and Nw</th>
+		<th>W+<img src=http://latex.codecogs.com/gif.latex?logN></img></th>
+		<th>general-purpose, strings with long prefix matches</th>
+    </tr>
+</table>
+Performance characteristics of string-sorting algorithms
