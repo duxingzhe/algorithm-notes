@@ -264,6 +264,43 @@ To sort N strings taken from an R-character alphabet, the amount of space needed
 
 We can also adapt quicksort to MSD string sorting by using 3-way partitioning on the leading character of the keys, moving to the next character on only the middle subarray (keys with leading character equal to the partitioning character).
 
+```
+public class Quick3string {
+	private static int charAt(String s, int d) {
+		if(d<s.length())
+			return s.charAt(d);
+		else
+			return -1;
+	}
+	
+	public static void sort(String[] a) {
+		sort(a,0,a.length-1,0);
+	}
+	
+	private static void sort(String[] a, int low, int high, int d) {
+		if(high<=low)
+			return;
+		int lt=low, gt=high;
+		int v=charAt(a[low],d);
+		int i=low+1;
+		while(i<=gt) {
+			int t=charAt(a[i],d);
+			if(t<v)
+				exch(a,lt++,i++);
+			else if(t>v)
+				exch(a,i,gt--);
+			else
+				i++;
+		}
+		
+		sort(a,low,lt-1,d);
+		if(v>=0)
+			sort(a,lt,gt,d+1);
+		sort(a,gt+1,high,d);
+	}
+}
+```
+
 ##### Small subarrays
 
 In any recursive algorithm, we can gain efficiency by treating small subarrays differently. In this case, we use the insertion sort from page 715, which skips the characters that are known to be equal. The improvement due to this change is likely to be significant, though not nearly as important as for MSD string sort.
