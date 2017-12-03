@@ -133,3 +133,109 @@ private void collect(Node x, String pre, Queue<String> q) {
     }
 }
 ```
+
+##### Wildcard match
+
+To implement keysThatMatch(), we use a similar process, but add an argument specifying the pattern to collect() and add a test to make a recursive call for all links when the pattern character is a wildcard or only for the link corresponding to the pattern character otherwise, as in the code below. Note also that we do not need to consider keys longer than the pattern.
+
+##### Longest prefix
+
+To find the longest key that is a prefix of a given string, we use a recursive method like get() that keeps track of the length of the longest key found on the search path (by passing it as a parameter to the recursive method, updating the value whenever a node with a non-null value is encountered). The search ends when the end of the string or a null link is encountered, whichever comes first.
+
+
+```
+public Iterable<String> keysThatMatch(String pat){
+	Queue<String> q=new Queue<String>();
+	collect(root,"",pat,q);
+	return q;
+}
+
+public void collect(Node x,String pre, String pat, Queue<String> q) {
+	int d=pre.length();
+	if(x==null)
+		return;
+	if(d==pat.length()&&x.val!=null)
+		q.enqueue(pre);
+	if(d==pat.length())
+		return;
+	char next=pat.charAt(d);
+	for(char c=0;c<R;c++) {
+		if(next=='.'||next==c) {
+			collect(x.next[c],pre+c,pat,q);
+		}
+	}
+}
+```
+
+```
+public String longestPrefixOf(String s) {
+	int length=search(root, s,0,0);
+	return s.substring(0,length);
+}
+
+private int search(Node x, String s, int d, int length) {
+	if(x==null)
+		return length;
+	if(x.val!=null)
+		length=d;
+	if(d==s.length())
+		return length;
+	char c=s.charAt(d);
+	return search(x.next[c],s,d+1,length);
+}
+```
+
+##### Deletion
+
+The first step needed to delete a key-value pair from a trie is to use a normal search to find the node corresponding to the key and set the corresponding value to null. If that node has a non-null link to a child, then no more work is required; if all the links are null, we need to remove the node from the data structure. If doing so leaves all the links null in its parent, we need to remove that node, and so forth.
+
+Alphabet
+
+As usual, Algorithm 5.4 is coded for Java String keys, but it is a simple matter to modify the implementation
+to handle keys taken from any alphabet, as follows:
+
+* Implement a constructor that takes an Alphabet as argument, which sets an Alphabet instance variable to that argument value and the instance variable R to the number of characters in the alphabet.
+* Use the toIndex() method from Alphabet in get() and put() to convert string characters to indices between 0 and R-1.
+* Use the toChar() method from Alphabet to convert indices between 0 and R-1 to char values. This operation is not needed in get() and put() but is important in the implementations of keys(), keysWithPrefix(), and keysThatMatch().
+
+#### Properties of tries
+
+As usual, we are interested in knowing the amount of time and space required to use tries in typical applications. Tries have been extensively studied and analyzed, and their basic properties are relatively easy to understand and to apply.
+
+##### Proposition F
+
+The linked structure (shape) of a trie is independent of the key insertion/deletion order: there is a unique trie for any given set of keys.
+
+##### Worst-case time bound for search and insert
+
+For BSTs, hashing, and other methods in Chapter 4, we needed mathematical analysis to study this question, but for tries it is very easy to answer:
+
+##### Proposition G
+
+The number of array accesses when searching in a trie or inserting a key into a trie is at most 1 plus the length of the key.
+
+##### Expected time bound for search miss
+
+Suppose that we are searching for a key in a trie and find that the link in the root node that corresponds to its first character is null.
+
+##### Proposition H
+
+The average number of nodes examined for search miss in a trie built from N random keys over an alphabet of size R is ~![](http://latex.codecogs.com/gif.latex?log_{R}N) .
+
+##### Space
+
+How much space is needed for a trie? Addressing this question (and understanding how much space is available) is critical to using tries effectively.
+
+##### Proposition I
+
+The number of links in a trie is between RN and RNw, where w is the average key length.
+
+The table on the facing page shows the costs for some typical applications that we have considered. It illustrates the following rules of thumb for tries:
+
+* When keys are short, the number of links is close to RN.
+* When keys are long, the number of links is close to RNw.
+* Therefore, decreasing R can save a huge amount of space.
+
+##### One-way branching
+
+The primary reason that trie space is excessive for long keys is that long keys tend to have long tails in the trie, with each node having a single link to the next node (and, therefore, R-1 null links).
