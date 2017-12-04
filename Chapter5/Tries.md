@@ -239,3 +239,148 @@ The table on the facing page shows the costs for some typical applications that 
 ##### One-way branching
 
 The primary reason that trie space is excessive for long keys is that long keys tend to have long tails in the trie, with each node having a single link to the next node (and, therefore, R-1 null links).
+
+#### Ternary search tries (TSTs)
+
+To help us avoid the excessive space cost associated with R-way tries, we now consider an alternative representation: the ternary search trie (TST). In a TST, each node has a character, three links, and a value. The three links correspond to keys whose current characters are less than, equal to, or greater than the node’s character. In the R-way tries of Algorithm 5.4, trie nodes are represented by R links, with the character corresponding to each non-null link implictly represented by its index.
+
+##### Search and insert
+
+The search and insert code for implementing our symbol-table API with TSTs writes itself. To search, we compare the first character in the key with the character at the root. If it is less, we take the left link; if it is greater, we take the right link; and if it is equal, we take the middle link and move to the next search key character.
+
+```
+public class TST<Value> {
+	
+	private Node root;
+	
+	private class Node {
+		char c;
+		Node left, mid, right;
+		Value val;
+	}
+	
+	public Value get(String key)
+	
+	private Node get(Node x, String key, int d) {
+		char c=key.charAt(d);
+		if(c<x.c)
+			return get(x.left,key,d);
+		else if(c>x.c)
+			return get(x.right,key,d);
+		else if(d<key.length()-1)
+			return get(x.mid,key,d+1);
+		else
+			return x;
+	}
+	
+	public void put(String key, Value val) {
+		root=put(root,key,val,0);
+	}
+	
+	private Node put(Node x,String key, Value val, int d) {
+		char c=key.charAt(d);
+		if(x==null) {
+			x=new Node();
+			x.c=c;
+		}
+		if(c<x.c)
+			x.left=put(x.left,key,val,d);
+		else if(c>x.c)
+			x.right=put(x.right,key,val,d);
+		else if(d<key.length()-1)
+			x.mid=put(x.mid,key,val,d+1);
+		else
+			x.val=val;
+		return x;
+	}
+
+}
+```
+
+##### Properties of TSTs
+
+A TST is a compact representation of an R-way trie, but the two data structures have remarkably different properties. Perhaps the most important difference is that Property A does not hold for TSTs: the BST representations of each trie node depend on the order of key insertion, as with any other BST.
+
+##### Space
+
+The most important property of TSTs is that they have just three links in each node, so a TST requires far less space than the corresponding trie.
+
+##### Proposition J
+
+The number of links in a TST built from N string keys of average length w is between 3N and 3Nw.
+
+##### Search cost
+
+To determine the cost of search (and insert) in a TST, we multiply the cost for the corresponding trie by the cost of traversing the BST representation of each trie node..
+
+##### Proposition K
+
+A search miss in a TST built from N random string keys requires ~![](http://latex.codecogs.com/gif.latex?lnN) character compares, on the average. A search hit or an insertion in a TST uses a character compare for each character in the search key.
+
+##### Alphabet
+
+The prime virtue of using TSTs is that they adapt gracefully to irregularities in search keys that are likely to appear in practical applications. In particular, note that there is no reason to allow for strings to be built from a client-supplied alphabet, as was crucial for tries. There are two main effects. First, keys in practical applications come from large alphabets, and usage of particular characters in the character sets is far from uniform. With TSTs, we can use a 256-character ASCII encoding or a 65,536-character Unicode encoding without having to worry about the excessive costs of nodes with 256- or 65,536-way branching, and without having to determine which sets of characters are relevant. Unicode strings in non-Roman alphabets can have thousands of characters—TSTs are especially appropriate for standard Java String keys that consist of such characters. Second, keys in practical applications often have a structured format, differing from application to application, perhaps using only letters in one part of the key, only digits in another part of the key.
+
+##### Prefix match, collecting keys, and wildcard match
+
+Since a TST represents a trie, implementations of longestPrefixOf(), keys(), keysWithPrefix(), and keysThatMatch() are easily adapted from the corresponding code for tries in the previous section, and a worthwhile exercise for you to cement your understanding of both tries and TSTs (see Exercise 5.2.9).
+
+##### Deletion
+
+The delete() method for TSTs requires more work. Essentially, each character in the key to be deleted belongs to a BST. In a trie, we could remove the link corresponding to a character by setting the corresponding entry in the array of links to null; in a TST, we have to use BST node deletion to remove the node corresponding to
+the character.
+
+##### Hybrid TSTs
+
+An easy improvement to TST-based search is to use a large explicit multiway node at the root. The simplest way to proceed is to keep a table of R TSTs: one for each possible value of the first character in the keys. If R is not large, we might use the first two letters of the keys (and a table of size ![](http://latex.codecogs.com/gif.latex?R^2)).
+
+##### One-way branching
+
+Just as with tries, we can make TSTs more efficient in their use of space by putting keys in leaves at the point where they are distinguished and by eliminating one-way branching between internal nodes.
+
+##### Proposition L
+
+A search or an insertion in a TST built from N random string keys with no external one-way branching and R t-way branching at the root requires roughly ![](http://latex.codecogs.com/gif.latex?lnN-tlnR) character compares, on the average.
+
+<table>
+    <tr>
+        <th rowspan="2">algorithm(data structure)</th>
+        <th colspan="2">typical growth rate for N strings from an R-character alphabet (average length w)</th>
+		<th rowspan="2">sweet spot</th>
+    </tr>
+    <tr>
+        <th>characters examined for search miss</th>
+        <th>memory usage</th>
+    </tr>
+    <tr>
+        <th>binary tree search(BST)</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?c_{1}(lgN)^2></img></th>
+		<th>64N</th>
+		<th>randomly ordered keys</th>
+    </tr>
+    <tr>
+        <th>2-3 tree search(red-black BST)</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?c_{2}(lgN)^2></img></th>
+		<th>64</th>
+		<th>guaranteed performance</th>
+    </tr>
+	<tr>
+        <th>linear probing(parallel arrays</th>
+		<th>w</th>
+		<th>32N to 128N</th>
+		<th>built-in types cached hash values</th>
+    </tr>
+	<tr>
+        <th>trie search(R-way trie)</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?log_{R}N></img></th>
+		<th>(8R+56)N to (8R+56)Nw</th>
+		<th>short keys small alphabets</th>
+    </tr>
+	<tr>
+        <th>trie search(TST)</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?1.39lgN></img></th>
+		<th>64N to 64Nw</th>
+		<th>nonrandom keys</th>
+    </tr>
+</table>
+Performance characteristics of string-search algorithms
