@@ -108,3 +108,225 @@ public class KMP {
 ##### Proposition N
 
 Knuth-Morris-Pratt substring search accesses no more than M+N characters to search for a pattern of length M in a text of length N.
+
+#### Boyer-Moore substring
+
+search When backup in the text string is not a problem, we can develop a significantly faster substring-searching method by scanning the pattern from right to left when trying to match it against the text.
+
+##### Mismatched character heuristic
+
+Starting point. To implement the mismatched character heuristic, we use an array right[] that gives, for each character in the alphabet, the index of its rightmost occurrence in the pattern (or -1 if the character is not in the pattern).
+
+##### Substring search
+
+With the right[] array precomputed, the implementation in Algorithm 5.7 is straightforward. We have an index i moving from left to right through the text and an index j moving from right to left through the pattern. The inner loop tests whether the pattern aligns with the text at position i. If txt.charAt(i+j) is equal to pat.charAt(j) for all j from M-1 down to 0, then there is a match. Otherwise, there is a character mismatch, and we have one of the following three cases:
+
+* If the character causing the mismatch is not found in the pattern, we can slide the pattern j+1 positions to the right (increment i by j+1). Anything less would align that character with some pattern character. Actually, this move aligns some known characters at the beginning of the pattern with known characters at the end of the pattern so that we could further increase i by precomputing a KMP-like table (see example at right).
+* If the character c causing the mismatch is found in the pattern, we use the right[] array to line up the pattern with the text so that character will match its rightmost occurrence in the pattern. To do so, we increment i by j minus right[c]. Again, anything less would align that text character with a pattern character it could not match (one to the right of its rightmost occurrence). Again, there is a possibility that we could do better with a KMP-like table, as indicated in the top example in the figure on page 773.
+* If this computation would not increase i, we just increment i instead, to make sure that the pattern always slides at least one position to the right. The bottom example in the figure at right illustrates this situation.
+
+Algorithm 5.7 is a straightforward implementation of this process.
+
+```
+public class BoyerMoore {
+	
+	private int[] right;
+	private String pat;
+	
+	BoyerMoore(String pat){
+		this.pat=pat;
+		int M=pat.length();
+		int R=256;
+		right=new int[R];
+		for(int c=0;c<R;c++) {
+			right[c]=-1;
+		}
+		for(int j=0;j<M;j++) {
+			right[pat.charAt(j)]=j;
+		}
+	}
+	
+	public int search(String txt) {
+		int N=txt.length();
+		int M=pat.length();
+		int skip;
+		for(int i=0;i<N-M;i+=skip) {
+			skip=0;
+			for(int j=M-1;j>=0;j--) {
+				if(pat.charAt(j)!=txt.charAt(i+j)) {
+					skip=j-right[txt.charAt(i+j)];
+					if(skip<1)
+						skip=1;
+					break;
+				}
+			}
+			if(skip==0)
+				return i;
+		}
+		return N;		
+	}
+
+}
+```
+
+##### Property O
+
+On typical inputs, substring search with the Boyer-Moore mismatched character heuristic uses ~N/M character compares to search for a pattern of length M in a text of length N.
+
+#### Rabin-Karp fingerprint search
+
+The method developed by M. O. Rabin and R. A. Karp is a completely different approach to substring search that is based on hashing. We compute a hash function for the pattern and then look for a match by using the same hash function for each possible M-character substring of the text. If we find a text substring with the same hash value as the pattern, we can check for a match. This process is equivalent to storing the pattern in a hash table, then doing a search for each substring of the text, but we do not need to reserve the memory for the hash table because it would have just one entry.
+
+##### Basic plan
+
+A string of length M corresponds to an M-digit base-R number. To use a hash table of size Q for keys of this type, we need a hash function to convert an M-digit base-R number to an int value between 0 and Q-1. Modular hashing (see Section 3.4) provides an answer: take the remainder when dividing the number by Q. In practice, we use a random prime Q, taking as large a value as possible while avoiding overflow (because we do not actually need to store a hash table).
+
+##### Computing the hash function
+
+With five-digit values, we could just do all the necessary calculations with int values, but what do we do when M is 100 or 1,000? A simple application of Horner’s method, precisely like the method that we examined in Section 3.4 for strings and other types of keys with multiple values, leads to the code shown at right, which computes the hash function for an M-digit base-R number represented as a char array in time proportional to M. (We pass M as an argument so that we can use the method for both the pattern and the text, as you will see.)
+
+```
+public class RabinKarp {
+	private String pat;
+	private long patHash;
+	private int M;
+	private long Q;
+	private int R=256;
+	private long RM;
+	
+	public RabinKarp(String pat) {
+		this.pat=pat;
+		this.M=pat.length();
+		Q=longRandomPrime();
+		RM=1;
+		for(int i=1;i<=M-1;i++) {
+			RM=(R*RM)%Q;
+		}
+		patHash=hash(pat,M);
+	}
+	
+	public boolean check(int i) {
+		return true;
+	}
+	
+	private long hash(String key, int M){
+		
+	}
+	
+	private int search(String txt) {
+		int N=txt.length();
+		long txtHash=hash(txt,M);
+		if(patHash==txtHash)
+			return 0;
+		for(int i=M;i<N;i++) {
+			txtHash=(txtHash+Q-RM*txt.charAt(i-M)%Q)%Q;
+			txtHash=(txtHash*R+txt.charAt(i))%Q;
+			if(patHash==txtHash)
+				if(check(i-M+1))
+					return i-M+1;
+		}
+		return N;
+	}
+	
+}
+```
+
+##### Key idea
+
+The Rabin-Karp method is based on efficiently computing the hash function for position i+1 in the text, given its value for position i. It follows directly from a simple mathematical formulation. Using the notation ti for txt.charAt(i), the number corresponding to the M-character substring of txt that starts at position i is
+
+![](http://latex.codecogs.com/gif.latex?x_i=t_iR^{M-2}+...+t_{i+M-1}R^0)
+
+and we can assume that we know the value of h(xi) = xi mod Q . Shifting one position right in the text corresponds to replacing xi by
+
+![](http://latex.codecogs.com/gif.latex?x_{i+1}=(x_i-t_iR^{M-1})R+t_{i+M})
+
+We subtract off the leading digit, multiply by R, then add the trailing digit.
+
+##### Implementation
+
+The constructor computes a hash value patHash for the pattern; it also computes the value of RM-1mod Q in the variable RM. The hashSearch() method begins by computing the hash function for the first M characters of the text and comparing that value against the hash value for the pattern. If that is not a match, it proceeds through the text string, using the technique above to maintain the hash function for the M characters starting at position i for each i in a variable txtHash and comparing each new hash value to patHash. (An extra Q is added during the txtHash calculation to make sure that everything stays positive so that the remainder operation works as it should.)
+
+##### A trick: Monte Carlo correctness
+
+After finding a hash value for an M-character substring of txt that matches the pattern hash value, you might expect to see code to compare those characters with the pattern to ensure that we have a true match, not just a hash collision. We do not do that test because using it requires backup in the text string. Instead, we make the hash table “size” Q as large as we wish, since we are not actually building a hash table, just testing for a collision with one key, our pattern.
+
+```
+```
+
+##### Property P
+
+The Monte Carlo version of Rabin-Karp substring search is linear-time and extremely likely to be correct, and the Las Vegas version of Rabin-Karp substring search is correct and extremely likely to be linear-time.
+
+#### Summary
+
+<table>
+    <tr>
+        <th rowspan="2">algorithm</th>
+		<th rowspan="2">stable?</th>
+		<th rowspan="2">inplace?</th>
+        <th colspan="2">order of growth of typical number calls to charAt() to sort N strings from an R-character alphabet (average length w, max length W)</th>
+		<th rowspan="2">sweet spot</th>
+    </tr>
+    <tr>
+        <th>running time</th>
+        <th>extra space</th>
+    </tr>
+    <tr>
+        <th>insertion sort for strings</th>
+        <th>yes</th>
+		<th>yes</th>
+		<th>between N and <img src=http://latex.codecogs.com/gif.latex?N^2></img></th>
+		<th>1</th>
+		<th>small arrays, arrays in order</th>
+    </tr>
+    <tr>
+        <th>quicksort</th>
+        <th>no</th>
+		<th>yes</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?Nlog^{2}N></img></th>
+		<th><img src=http://latex.codecogs.com/gif.latex?logN></img></th>
+		<th>gernal-purpose when space is tight</th>
+    </tr>
+	<tr>
+        <th>mergesort</th>
+        <th>yes</th>
+		<th>no</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?Nlog^{2}N></img></th>
+		<th><img src=http://latex.codecogs.com/gif.latex?logN></img></th>
+		<th>gernal-purpose stable sort</th>
+    </tr>
+	<tr>
+        <th>3-way quicksort</th>
+        <th>no</th>
+		<th>yes</th>
+		<th>between N and <img src=http://latex.codecogs.com/gif.latex?NlogN></img></th>
+		<th><img src=http://latex.codecogs.com/gif.latex?logN></img></th>
+		<th>large numbers of equal keys</th>
+    </tr>
+	<tr>
+        <th>LSD string sort</th>
+        <th>yes</th>
+		<th>no</th>
+		<th>NW</th>
+		<th>N</th>
+		<th>short fixed-length strings</th>
+    </tr>
+	<tr>
+        <th>MSD string sort</th>
+        <th>yes</th>
+		<th>no</th>
+		<th>between N and Nw</th>
+		<th>N+WR</th>
+		<th>random strings</th>
+    </tr>
+	<tr>
+        <th>3-way string quicksort</th>
+        <th>no</th>
+		<th>yes</th>
+		<th>between N and Nw</th>
+		<th>W+<img src=http://latex.codecogs.com/gif.latex?logN></img></th>
+		<th>general-purpose, strings with long prefix matches</th>
+    </tr>
+</table>
+Performance characteristics of string-sorting algorithms
