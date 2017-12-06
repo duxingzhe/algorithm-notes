@@ -263,70 +263,75 @@ The Monte Carlo version of Rabin-Karp substring search is linear-time and extrem
 <table>
     <tr>
         <th rowspan="2">algorithm</th>
-		<th rowspan="2">stable?</th>
-		<th rowspan="2">inplace?</th>
-        <th colspan="2">order of growth of typical number calls to charAt() to sort N strings from an R-character alphabet (average length w, max length W)</th>
-		<th rowspan="2">sweet spot</th>
+		<th rowspan="2">version</th>
+        <th colspan="2">operation count</th>
+		<th rowspan="2">backup in input?</th>
+		<th rowspan="2">correct?</th>
+		<th rowspan="2">extra space</th>
     </tr>
     <tr>
-        <th>running time</th>
-        <th>extra space</th>
+        <th>guarantee</th>
+        <th>typical</th>
     </tr>
     <tr>
-        <th>insertion sort for strings</th>
-        <th>yes</th>
+        <th>brute force</th>
+        <th>-</th>
+		<th>MN</th>
+		<th>1.1N</th>
 		<th>yes</th>
-		<th>between N and <img src=http://latex.codecogs.com/gif.latex?N^2></img></th>
+		<th>yes</th>
 		<th>1</th>
-		<th>small arrays, arrays in order</th>
     </tr>
     <tr>
-        <th>quicksort</th>
-        <th>no</th>
-		<th>yes</th>
-		<th><img src=http://latex.codecogs.com/gif.latex?Nlog^{2}N></img></th>
-		<th><img src=http://latex.codecogs.com/gif.latex?logN></img></th>
-		<th>gernal-purpose when space is tight</th>
-    </tr>
-	<tr>
-        <th>mergesort</th>
-        <th>yes</th>
+        <th rowspan="2">Knuth-Morris-Pratt</th>
+        <th>full DFA</th>
+		<th>2N</th>
+		<th>1.1N</th>
 		<th>no</th>
-		<th><img src=http://latex.codecogs.com/gif.latex?Nlog^{2}N></img></th>
-		<th><img src=http://latex.codecogs.com/gif.latex?logN></img></th>
-		<th>gernal-purpose stable sort</th>
-    </tr>
-	<tr>
-        <th>3-way quicksort</th>
-        <th>no</th>
 		<th>yes</th>
-		<th>between N and <img src=http://latex.codecogs.com/gif.latex?NlogN></img></th>
-		<th><img src=http://latex.codecogs.com/gif.latex?logN></img></th>
-		<th>large numbers of equal keys</th>
+		<th>MR</th>
     </tr>
 	<tr>
-        <th>LSD string sort</th>
-        <th>yes</th>
+		<th>mismatch transitions only</th>
+		<th>3N</th>
+		<th>1.1N</th>
 		<th>no</th>
-		<th>NW</th>
-		<th>N</th>
-		<th>short fixed-length strings</th>
-    </tr>
-	<tr>
-        <th>MSD string sort</th>
-        <th>yes</th>
-		<th>no</th>
-		<th>between N and Nw</th>
-		<th>N+WR</th>
-		<th>random strings</th>
-    </tr>
-	<tr>
-        <th>3-way string quicksort</th>
-        <th>no</th>
 		<th>yes</th>
-		<th>between N and Nw</th>
-		<th>W+<img src=http://latex.codecogs.com/gif.latex?logN></img></th>
-		<th>general-purpose, strings with long prefix matches</th>
+		<th>M</th>
+	</tr>
+	<tr>
+        <th rowspan="2">Boyer-Moore</th>
+        <th>full algorithm</th>
+		<th>3N</th>
+		<th>N/M</th>
+		<th>yes</th>
+		<th>yes</th>
+		<th>R</th>
     </tr>
+	<tr>
+		<th>mismatched char heuristic only</th>
+		<th>MN</th>
+		<th>N/M</th>
+		<th>yes</th>
+		<th>yes</th>
+		<th>R</th>
+	</tr>
+	<tr>
+        <th rowspan="2">Rabin-Karp</th>
+        <th>Monte Carlo</th>
+		<th>7N</th>
+		<th>7N</th>
+		<th>no</th>
+		<th>yes</th>
+		<th>1</th>
+    </tr>
+	<tr>
+		<th>Las Vegas</th>
+		<th>7N</th>
+		<th>7N</th>
+		<th>yes</th>
+		<th>yes</th>
+		<th>1</th>
+	</tr>
 </table>
-Performance characteristics of string-sorting algorithms
+Cost summary for substring search implementations
