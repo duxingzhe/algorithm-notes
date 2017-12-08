@@ -103,6 +103,50 @@ The closure operator specifies any number of copies of its operand. In practice,
 
 Some characters, such as \, ., |, *, (, and ), are metacharacters that we use to form regular expressions. We use escape sequences that begin with a backslash character \ separating metacharacters from characters in the alphabet. An escape sequence may be a \ followed by a single metacharacter (which represents that character). For example, \\\\ represents \\. Other escape sequences represent special characters and whitespace. For example, \t represents a tab character, \n represents a newline, and \s represents any whitespace character.
 
+<table>
+    <tr>
+        <th>option</th>
+		<th>notation</th>
+		<th>example</th>
+        <th>shortcut for</th>
+        <th>in language</th>
+        <th>not in language</th>
+    </tr>
+    <tr>
+        <th>at least 1</th>
+        <th>+</th>
+		<th>(AB)+</th>
+        <th>(AB)(AB)*</th>
+        <th>AB ABABAB</th>
+        <th> BBBAAA</th>
+    </tr>
+    <tr>
+        <th>0 or 1</th>
+        <th>?</th>
+		<th>(AB)?</th>
+        <th>| AB</th>
+        <th> AB</th>
+        <th>any other string</th>
+    </tr>
+	<tr>
+        <th>specific</th>
+        <th>count in{3}</th>
+		<th>(AB){3}</th>
+        <th>(AB)(AB)(AB)</th>
+        <th>ABABAB</th>
+        <th>any other string</th>
+    </tr>
+	<tr>
+        <th>range</th>
+        <th>range in {}</th>
+		<th>(AB){1-2}</th>
+        <th>(AB)|(AB)(AB)</th>
+        <th>AB ABAB</th>
+        <th>any other string</th>
+    </tr>
+</table>
+Closure shortcuts (for specifying the number of copies of the operand)
+
 #### REs in applications
 
 REs have proven to be remarkably versatile in describing languages that are relevant in practical applications. Accordingly, REs are heavily used and have been heavily studied. To familiarize you with regular expressions while at the same time giving you some appreciation for their utility, we consider a number of practical applications before addressing the RE pattern-matching algorithm.
@@ -169,4 +213,67 @@ other symptoms is known to be associated with a high number of repeats.
 
 ##### Search
 
-Web search engines support REs, though not always in their full glory. Typically, if you want to specify alternatives with | or repetition with \*, you can do so. Possibilities. A first introduction to theoretical computer science is to think about the set of languages that can be specified with an RE. For example, you might be surprised to know that you can implement the modulus operation with an RE: for example, (0 | 1(01*0)*1)\* describes all strings of 0s and 1s that are the binary representatons of numbers that are multiples of three (!): 11 , 110 , 1001 , and 1100 are in the language, but 10 , 1011 , and 10000 are not. Limitations. Not all languages can be specified with REs. A thought-provoking example is that no RE can describe the set of all strings that specify legal REs. Simpler versions of this example are that we cannot use REs to check whether parentheses are balanced or to check whether a string has an equal number of As and Bs.
+Web search engines support REs, though not always in their full glory. Typically, if you want to specify alternatives with | or repetition with \*, you can do so. 
+
+##### Possibilities
+
+A first introduction to theoretical computer science is to think about the set of languages that can be specified with an RE. For example, you might be surprised to know that you can implement the modulus operation with an RE: for example, (0 | 1(01*0)*1)\* describes all strings of 0s and 1s that are the binary representatons of numbers that are multiples of three (!): 11 , 110 , 1001 , and 1100 are in the language, but 10 , 1011 , and 10000 are not.
+
+##### Limitations
+
+Not all languages can be specified with REs. A thought-provoking example is that no RE can describe the set of all strings that specify legal REs. Simpler versions of this example are that we cannot use REs to check whether parentheses are balanced or to check whether a string has an equal number of As and Bs.
+
+##### Nondeterministic finite-state automata
+
+Recall that we can view the Knuth-Morris-Pratt algorithm as a finite-state machine constructed from the search pattern that scans the text. For regular expression pattern matching, we will generalize this idea.
+
+The overview of our RE pattern matching algorithm is the nearly the same as for KMP:
+
+* Build the NFA corresponding to the given RE.
+* Simulate the operation of that NFA on the given text.
+
+Kleene’s Theorem, a fundamental result of theoretical computer science, asserts that there is an NFA corresponding to any given RE (and vice versa). We will consider a constructive proof of this fact that will demonstrate how to transform any RE into an NFA; then we simulate the operation of the NFA to complete the job.
+
+As illustrated in this example, the NFAs that we define have the following characteristics:
+
+* The NFA corresponding to an RE of length M has exactly one state per pattern character, starts at state 0, and has a (virtual) accept state M.
+* States corresponding to a character from the alphabet have an outgoing edge that goes to the state corresponding to the next character in the pattern (black edges in the diagram).
+* States corresponding to the metacharacters (, ), |, and * have at least one outgoing edge (red edges in the diagram), which may go to any other state.
+* Some states have multiple outgoing edges, but no state has more than one outgoing black edge.
+
+As with the DFAs of the previous section, we start the NFA at state 0, reading the first character of a text. The NFA moves from state to state, sometimes reading text characters, one at a time, from left to right. However, there are some basic differences from DFAs:
+
+* Characters appear in the nodes, not the edges, in the diagrams.
+* Our NFA recognizes a text string only after explicitly reading all its characters, whereas our DFA recognizes a pattern in a text without necessarily reading all the text characters.
+
+The rules for moving from one state to another are also different than for DFAs—an NFA can do so in one of two ways:
+
+* If the current state corresponds to a character in the alphabet and the current character in the text string matches the character, the automaton can scan past the character in the text string and take the (black) transition to the next state. We refer to such a transition as a match transition.
+* The automaton can follow any red edge to another state without scanning any text character. We refer to such a transition as an -transition, referring to the idea that it corresponds to “matching” the empty string .
+
+These examples illustrate the key difference between NFAs and DFAs: since an NFA may have multiple edges leaving a given state, the transition from such a state is not deterministic—it might take one transition at one point in time and a different transition at a different point in time, without scanning past any text character. To make some sense of the operation of such an automaton, imagine that an NFA has the power to guess which transition (if any) will lead to the accept state for the given text string. In other words, we say that an NFA recognizes a text string if and only if there is some sequence of transitions that scans all the text characters and ends in the accept state when started at the beginning of the text in state 0. Conversely, an NFA does not recognize a text string if and only if there is no sequence of match transitions and -transitions that can scan all the text characters and lead to the accept state for that string.
+
+As with DFAs, we have been tracing the operation of the NFA on a text string simply by listing the sequence of state changes, ending in the final state. Any such sequence is a proof that the machine recognizes the text string (there may be other proofs). But how do we find such a sequence for a given text string? And how do we prove that there is no such sequence for another given text string? The answers to these questions are easier than you might think: we systematically try all possibilities.
+
+##### Simulating an NFA
+
+The idea of an automaton that can guess the state transitions it needs to get to the accept state is like writing a program that can guess the right answer to a problem: it seems ridiculous. On reflection, you will see that the task is conceptually not at all difficult: we make sure that we check all possible sequences of state transitions, so if there is one that gets to the accept state, we will find it.
+
+##### Representation
+
+To begin, we need an NFA representation. The choice is clear: the RE itself gives the state names (the integers between 0 and M, where M is the number of characters in the RE).
+
+##### NFA simulation and reachability
+
+To simulate an NFA, we keep track of the set of states that could possibly be encountered while the automaton is examining the current input character. The key computation is the familiar multiple-source reachability computation that we addressed in Algorithm 4.4 (page 571).
+
+Iterating this process until all text characters are exhausted leads to one of two outcomes:
+
+* The set of possible states contains the accept state.
+* The set of possible states does not contain the accept state.
+
+The first of these outcomes indicates that there is some sequence of transitions that takes the NFA to the accept state, so we report success. The second of these outcomes indicates that the NFA always stalls on that input, so we report failure.
+
+##### Proposition Q
+
+Determining whether an N-character text string is recognized by the NFA corresponding to an M-character RE takes time proportional to NM in the worst case.
