@@ -277,3 +277,120 @@ The first of these outcomes indicates that there is some sequence of transitions
 ##### Proposition Q
 
 Determining whether an N-character text string is recognized by the NFA corresponding to an M-character RE takes time proportional to NM in the worst case.
+
+```
+public boolean recognizes(String txt) {
+    Bag<Integer> pc=new Bag<Integer>();
+    DirectedDFS dfs=new DirectedDFS(G,0);
+    for(int v=0;v<G.V();v++) {
+        if(dfs.marked(v))
+            pc.add(v);
+    }
+    for(int i=0;i<txt.length();i++) {
+        Bag<Integer> match=new Bag<Integer>();
+        for(int v: pc) {
+            if(v<M) {
+                if(re[v]==txt.charAt(i)||re[v]=='.') {
+                    match.add(v+1);
+                }
+            }
+        }
+        pc=new Bag<Integer>();
+        dfs=new DirectedDFS(G,match);
+        for(int v=0;v<G.V();v++) {
+            if(dfs.marked(v))
+                pc.add(v);
+        }
+    }
+    for(int v:pc)
+        if(v==M)
+            return true;
+    return false;
+}
+```
+
+#### Building an NFA corresponding to an RE
+
+From the similarity between regular expressions and familiar arithmetic expressions, you may not be surprised to find that translating an RE to an NFA is somewhat similar to the process of evaluating an arithmetic expression using Dijkstra’s two-stack algorithm, which we considered in Section 1.3. The process is a bit different because
+
+* REs do not have an explicit operator for concatenation
+* REs have a unary operator, for closure (*)
+* REs have only one binary operator, for or (|)
+
+Taking a cue from Dijkstra’s algorithm, we will use a stack to keep track of the positions of left parentheses and or operators.
+
+##### Concatenation
+
+In terms of the NFA, the concatenation operation is the simplest to implement. Match transitions for states corresponding to characters in the alphabet explicitly implement concatenation.
+
+##### Parentheses
+
+We push the RE index of each left parenthesis on the stack. Each time we encounter a right parenthesis, we eventually pop the corresponding left parentheses from the stack in the manner described below. As in Dijkstra’s algorithm, the stack enables us to handle nested parentheses in a natural manner.
+
+##### Closure
+
+A closure (*) operator must occur either (i ) after a single character, when we add -transitions to and from the character, or (ii ) after a right parenthesis, when we add -transitions to and from the corresponding left parenthesis, the one at the top of the stack.
+
+##### Or expression
+
+We process an RE of the form (A | B) where A and B are both REs by adding two -transitions: one from the state corresponding to the left parenthesis to the state corresponding to the first character of B and one from the state corresponding to the | operator to the state corresponding to the right parenthesis. We push the RE index corresponding the | operator onto the stack (as well as the index corresponding to the left parenthesis, as described above) so that the information we need is at the top of the stack when needed, at the time we reach the right parenthesis. These -transitions allow the NFA to choose one of the two alternatives. We do not add an -transition from the state corresponding to the | operator to the state with the next higher index, as we havefor all other states—the only way for the NFA to leave such a state is to take a transition to the state corresponding to the right parenthesis.
+
+```
+public class NFA {
+
+	private char[] re;
+	private Digraph G;
+	private int M;
+	
+	public NFA(String regexp) {
+		Stack<Integer> ops=new Stack<Integer>();
+		re=regexp.toCharArray();
+		M=re.length;
+		G=new Digraph(M+1);
+		
+		for(int i=0;i<M;i++) {
+			int lp=i;
+			if(re[i]='('||re[i]=='|')
+				ops.push(i);
+			else if(re[i]==')') {
+				int or=ops.pop();
+				if(re[or]=='|') {
+					lp=ops.pop();
+					G.addEdge(lp, or+1);;
+					G.addEdge(or, i);
+				}
+				else
+					lp=or;
+			}
+			if(i<M-1&&re[i+1]=='*') {
+				G.addEdge(lp, i+1);
+				G.addEdge(i+1, lp);
+			}
+			if(re[i]=='('||re[i]=='*'||re[i]==')')
+				G.addEdge(i, i+1);
+		}
+	}
+	
+	public boolean recognizes(String txt)	
+	
+}
+```
+
+##### Proposition R
+
+Building the NFA corresponding to an M-character RE takes time and space proportional to M in the worst case.
+
+```
+public class GREP {
+
+	public static void main(String[] args) {
+		String regexp="(.*"+args[0]+".*)";
+		NFA nfa=new NFA(regexp);
+		while(StdIn.hasNextLine()) {
+			String txt=StdIn.hasNextLine();
+			if(nfa.recongizes(txt))
+				StdOut.println(txt);
+		}
+	}
+}
+```
