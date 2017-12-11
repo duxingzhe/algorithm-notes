@@ -98,3 +98,144 @@ The four methods that we consider exploit, in turn, the following structural cha
 * Frequently used characters
 * Long reused bit/character sequences
 
+#### Warmup: genomics
+
+As preparation for more complicated data-compression algorithms, we now consider an elementary (but very important) data-compression task.
+
+##### Genomic data
+
+As a first example of data compression, consider this string:
+
+ATAGATGCATAGCGCATAGCTAGATGTGCTAGCAT
+
+Using standard ASCII encoding (1 byte, or 8 bits per character), this string is a bitstream of length 835 = 280. Strings of this sort are extremely important in modern biology, because biologists use the letters A, C, T, and G to represent the four nucleotides in the DNA of living organisms. A genome is a sequence of nucleotides.
+
+##### 2-bit code compression
+
+One simple property of genomes is that they contain only four different characters, so each can be encoded with just 2 bits per character, as in the compress() method shown at right.
+
+```
+public static void compress() {
+	Alphabet DNA=new Alphabet("ACTG");
+	String s=BinaryStdIn.readString();
+	int N=s.length();
+	BinaryStdOut.write(N);
+	for(int i=0;i<N;i++) {
+		int d=DNA.toIndex(s.charAt(i));
+		BinaryStdOut.write(d,DNA.lgR());
+	}
+	BinaryStdOut.close();
+}
+```
+
+##### 2-bit code expansion
+
+The expand() method at the top of the next page expands a bitstream produced by this compress() method. As with compression, this method reads a bitstream and writes a bitstream, in accordance with the basic data-compression model. The bitstream that we produce as output is the original input.
+
+```
+public static void expand() {
+	Alphabet DNA=new Alphabet("ACTG");
+	int w=DNA.lgR();
+	int N=BinaryStdIn.readInt();
+	for(int i=0;i<N;i++) {
+		char c=BinaryStdIn.readChar(w);
+		BinaryStdOut.write(DNA.toChar(c));
+	}
+	BinaryStdOut.close();
+}
+```
+
+```
+public class Genome {
+
+	public static void compress()
+	
+	public static void expand()
+	
+	public static void main(String[] args) {
+		if(args[0].equals("-"))
+			compress();
+		if(args[0].equals("+"))
+			expand();
+	}
+}
+```
+
+#### Run-length encoding
+
+The simplest type of redundancy in a bitstream is long runs of repeated bits. Next, we consider a classic method known as run-length encoding for taking advantage of this redundancy to compress data.
+
+In order to turn this description into an effective data compression method, we have to consider the following issues:
+
+* How many bits do we use to store the counts?
+* What do we do when encountering a run that is longer than the maximum count implied by this choice?
+* What do we do about runs that are shorter than the number of bits needed to store their length?
+We are primarily interested in long bitstreams with relatively few short runs, so we address these questions by making the following choices:
+
+* Counts are between 0 and 255, all encoded with 8 bits.
+* We make all run lengths less than 256 by including runs of length 0 if needed.
+* We encode short runs, even though doing so might lengthen the output.
+
+##### Bitmaps
+
+As an example of the effectiveness of run-length encoding, we consider bitmaps, which are widely use to represent pictures and scanned documents. For brevity and simplicity, we consider binary-valued bitmaps organized as bitstreams formed by taking the pixels in row-major order.
+
+##### Implementation
+
+The informal description just given leads immediately to the compress() and expand() implementations on the next page.
+
+The compress() method is not much more difficult, consisting of the following steps while there are bits in the input stream:
+
+* Read a bit.
+* If it differs from the last bit read, write the current count and reset the count to 0.
+* If it is the same as the last bit read, and the count is a maximum, write the count, write a 0 count, and reset the count to 0.
+* Increment the count.
+
+When the input stream empties, writing the count (length of the last run) completes the process.
+
+##### Increasing resolution in bitmaps
+
+Then the following facts are evident:
+
+* The number of bits increases by a factor of 4.
+* The number of runs increases by about a factor of 2.
+* The run lengths increase by about a factor of 2.
+* The number of bits in the compressed version increases by about a factor of 2.
+* Therefore, the compression ratio is halved!
+
+```
+public static void compress() {
+	char count=0;
+	boolean b,old=false;
+	while(!BinaryStdIn.isEmpty()) {
+		b=BinaryStdIn.readBoolean();
+		if(b!=old) {
+			BinaryStdOut.write(count);
+			count=0;
+			old=!old;
+		} else {
+			if(count==255) {
+				BinaryStdOut.write(count);
+				count=0;
+				BinaryStdOut.write(count);
+				
+			}
+		}
+		count++;
+	}
+	BinaryStdOut.write(count);
+	BinaryStdOut.close();
+}
+
+public static void expand() {
+	boolean b=false;
+	while(!BinaryStdIn.isEmpty()) {
+		char count=BinaryStdIn.readChar();
+		for(int i=0;i<count;i++) {
+			BinaryStdOut.write(b);
+		}
+		b=!b;
+	}
+	BinaryStdOut.close();
+}
+```
