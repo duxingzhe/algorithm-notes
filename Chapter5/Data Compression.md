@@ -239,3 +239,217 @@ public static void expand() {
 	BinaryStdOut.close();
 }
 ```
+
+#### Huffman compression
+
+We now examine a data-compression technique that can save a substantial amount of space in natural language files (and many other kinds of files). The idea is to abandon the way in which text files are usually stored: instead of using the usual 7 or 8 bits for each character, we use fewer bits for characters that appear often than for those that appear rarely.
+
+##### Variable-length prefix-free codes
+
+A code associates each character with a bitstring: a symbol table with characters as keys and bitstrings as values.
+
+##### Trie representation for prefix-free codes
+
+One convenient way to represent a prefix-free code is with a trie (see Section 5.2).
+
+##### Overview
+
+Using a prefix-free code for data compression involves five major steps. We view the bitstream to be encoded as a bytestream and use a prefix-free code for the characters as follows:
+
+* Build an encoding trie.
+* Write the trie (encoded as a bitstream) for use in expansion.
+* Use the trie to encode the bytestream as a bitstream.
+
+Then expansion requires that we
+
+* Read the trie (encoded at the beginning of the bitstream)
+* Use the trie to decode the bitstream
+
+##### Trie nodes
+
+We begin with the Node class at left. It is similar to the nested classes that we have used before to construct binary trees and tries: each Node has left and right references to Nodes, which define the trie structure. Each Node also has an instance variable freq that is used in construction, and an instance variable ch, which is used in leaves to represent characters to be encoded.
+
+```
+public class Node implements Comparable<Node> {
+	
+	private char ch;
+	private int freq;
+	private final Node left,right;
+	
+	Node(char ch, int freq, Node left, Node right){
+		this.ch=ch;
+		this.freq=freq;
+		this.left=left;
+		this.right=right;
+	}
+	
+	public boolean isLeaf() {
+		return left==null&&right==null;
+	}
+	
+	public int compareTo(Node that) {
+		return this.freq-that.freq;
+	}
+
+}
+```
+
+##### Expansion for prefix-free codes
+
+Expanding a bitstream that was encoded with a prefixfree code is simple, given the trie that defines the code.
+
+```
+public static void expand() {
+	Node root=readTrie();
+	int N=BinaryStdIn.readInt();
+	for(int i=0;i<N;i++) {
+		Node x=root;
+		while(!x.isLeft()) {
+			if(BinaryStdIn.readBoolean()) {
+				x=x.right;
+			}else {
+				x=x.left;
+			}
+		}
+		BinaryStdOut.write(x.ch);
+	}
+	BinaryStdOut.close();
+}
+```
+
+```
+private static void buildCode(String[] st, Node x, String s) {
+	if(x.isLeaf()) {
+		st[x.ch]=s;
+		return;
+	}
+	buildCode(st,x.left,s+'0');
+	buildCode(st,x.right,s+'1');
+}
+```
+
+##### Compression for prefix-free codes
+
+For compression, we use the trie that defines the code to build the code table, as shown in the buildCode() method at the top of this page. This method is compact and elegant, but a bit tricky, so it deserves careful study. For any trie, it produces a table giving the bitstring associated with each character in the trie (represented as a String of 0s and 1s).
+
+```
+for(int i=0;i<input.length;i++) {
+	String code=st[input[i]];
+	for(int j=0;j<code.length();j++) {
+		if(code.charAt(j)=='1')
+			BinaryStdOut.write(true);
+		else
+			BinaryStdOut.write(false);
+	}
+}
+```
+
+##### Trie construction
+
+The process works as follows: we find the two nodes with the smallest frequencies and then create a new node with those two nodes as children (and with frequency value set to the sum of the values of the children). This operation reduces the number of tries in the forest by one. Then we iterate the process: find the two nodes with smallest frequency in that forest and a create a new node created in the same way. Implementing the process is straightforward with a priority queue, as shown in the buildTrie() method on page 830. (For clarity, the tries in the figure are kept in sorted order.)
+
+```
+private static Node buildTrie(int[] freq) {
+	MinPQ<Node> pq=new MinPQ<Node>();
+	for(char c=0;c<R;c++) {
+		if(freq[c]>0) {
+			pq.insert(new Node(c,freq[c],null,null));
+		}
+	}
+	while(pq.size()>1) {
+		Node x=pq.delMin();
+		Node y=pq.delMin();
+		Node parent=new Node('\0',x.freq+y.freq,x,y);
+		pq.insert(parent);
+	}
+	return pq.delMin();
+}
+```
+
+##### Optimality
+
+We have observed that high-frequency characters are nearer the root of the tree than lower-frequency characters and are therefore encoded with fewer bits, so this is a good code, but why is it an optimal prefix-free code? To answer this question, we begin by defining the weighted external path length of a tree to be the sum of the weight (associated frequency count) times depth (see page 226) of all of the leaves.
+
+##### Proposition T
+
+For any prefi x-free code, the length of the encoded bitstring is equal to the weighted external path length of the corresponding trie.
+
+##### Proposition U
+
+Given a set of r symbols and frequencies, the Huffman algorithm builds an optimal prefix-free code.
+
+```
+```
+
+```
+```
+
+##### Huffman compression implementation
+
+Along with the methods buildCode(), buildTrie(), readTrie() and writeTrie() that we have just considered (and the expand() method that we considered first), Algorithm 5.10 is a complete implementation of Huffman compression. To expand the overview that we considered several pages earlier, we view the bitstream to be encoded as a stream of 8-bit char values and compress it as follows:
+
+* Read the input.
+* Tabulate the frequency of occurrence of each char value in the input.
+* Build the Huffman encoding trie corresponding to those frequencies.
+* Build the corresponding codeword table, to associate a bitstring with each char value in the input.
+* Write the trie, encoded as a bitstring.
+* Write the count of characters in the input, encoded as a bitstring.
+* Use the codeword table to write the codeword for each input character.
+
+To expand a bitstream encoded in this way, we
+
+* Read the trie (encoded at the beginning of the bitstream)
+* Read the count of characters to be decoded
+* Use the trie to decode the bitstream
+
+```
+```
+
+##### LZW compression
+
+To fix ideas, we will consider a compression example where we read the input as a stream of 7-bit ASCII characters and write the output as a stream of 8-bit bytes. (In practice, we typically use larger values for these parameters—our implementations use 8-bit inputs and 12-bit outputs.)
+
+##### The LZW compression algorithm
+
+is based on maintaining a symbol table that associates string keys with (fixedlength) codeword values. We initialize the symbol table with the 128 possible singlecharacter string keys and associate them with 8-bit codewords obtained by prepending 0 to the 7-bit value defining each character.
+
+To compress, we perform the following steps as long as there are unscanned input characters:
+
+* Find the longest string s in the symbol table that is a prefi x of the unscanned
+input.
+* Write the 8-bit value (codeword) associated with s.
+* Scan one character past s in the input.
+* Associate the next codeword value with s + c (c appended to s) in the symbol table, where c is the next character in the input.
+
+##### LZW trie representation
+
+LZW compression involves two symbol-table operations:
+
+* Find a longest-prefi x match of the input with a symbol-table key.
+* Add an entry associating the next codeword
+
+with the key formed by appending the lookahead character to that key.
+
+##### LZW expansion
+
+The input for LZW expansion in our example is a sequence of 8-bit codewords; the output is a string of 7-bit ASCII characters. To implement expansion, we maintain a symbol table that associates strings of characters with codeword values (the inverse of the table used for compression). We fill the table entries from 00 to 7F with one-character strings, one for each ASCII character, set the first unassigned codeword value to 81 (reserving 80 for end of file), set the current string val to the onecharacter string consisting of the first character, and perform the following steps until reading codeword 80 (end of file):
+
+* Write the current string val.
+* Read a codeword x from the input.
+* Set s to the value associated with x in the symbol table.
+* Associate the next unasssigned codeword value to val + c in the symbol table, where c is the first character of s.
+* Set the current string val to s.
+
+```
+```
+
+##### Tricky situation
+
+There is a subtle bug in the process just described, one that is often discovered by students (and experienced programmers!) only after developing an implementation based on the description above.
+
+##### Implementation
+
+With these descriptions, implementing LZW encoding is straightforward, given in Algorithm 5.11 on the facing page (the implementation of expand() is on the next page).
+
+```
+```
