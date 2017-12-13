@@ -379,9 +379,25 @@ For any prefi x-free code, the length of the encoded bitstring is equal to the w
 Given a set of r symbols and frequencies, the Huffman algorithm builds an optimal prefix-free code.
 
 ```
+private static void writeTrie(Node x) {
+	if(x.isLeaf()) {
+		BinaryStdOut.write(true);
+		BinaryStdOut.write(x.ch);
+		return;
+	}
+	BinaryStdOut.write(false);
+	writeTrie(x.left);
+	writeTrie(x.right);
+}
 ```
 
 ```
+private static Node readTrie() {
+	if(BinaryStdIn.readBoolean()) {
+		return new Node(BinaryStdIn.readChar(),0,null,null);
+	}
+	return new Node('\0',0,readTrie(),readTrie());
+}
 ```
 
 ##### Huffman compression implementation
@@ -403,6 +419,41 @@ To expand a bitstream encoded in this way, we
 * Use the trie to decode the bitstream
 
 ```
+public class Huffman {
+	
+	private static int R=256;
+	
+	public static void compress() {
+		String s=BinaryStdIn.readString();
+		char[] input=s.toCharArray();
+		
+		int[] freq=new int[R];
+		for(int i=0;i<input.length;i++) {
+			freq[input[i]]++;
+		}
+		
+		Node root=buildTrie(freq);
+		
+		String[] st=new String[R];
+		buildCode(st,root,"");
+		
+		writeTrie(root);
+		
+		BinaryStdOut.write(input.length);
+		
+		for(int i=0;i<input.length;i++) {
+			String code=st[input[i]];
+			for(int j=0;j<code.length();j++);
+			if(code.charAt(j)=='1') {
+				BinaryStdOut.write(true);
+			}else {
+				BinaryStdOut.write(false);
+			}
+		}
+		BinaryStdOut.close();
+	}
+
+}
 ```
 
 ##### LZW compression
@@ -441,6 +492,37 @@ The input for LZW expansion in our example is a sequence of 8-bit codewords; the
 * Set the current string val to s.
 
 ```
+public class LZW {
+	
+	private static final int R=256;
+	private static final int L=4096;
+	private static final int W=12;
+	
+	public static void compress() {
+		String input=BinaryStdIn.readString();
+		TST<Integer> st=new TST<Integer>();
+		
+		for(int i=0;i<R;i++) {
+			st.put(""+(char) i,i);
+		}
+		int code=R+1;
+		
+		while(input.length()>0) {
+			String s=st.longestPrefixOf(input);
+			BinaryStdOut.write(st.get(s),W);
+			int t=s.length();
+			if(t<input.length()&&code<L) {
+				st.put(input.substring(0,t+1), code++);
+			}
+			input=input.substring(t);
+		}
+		BinaryStdOut.write(R,W);
+		BinaryStdOut.close();
+	}
+	
+	public static void expand()
+
+}
 ```
 
 ##### Tricky situation
@@ -452,4 +534,32 @@ There is a subtle bug in the process just described, one that is often discovere
 With these descriptions, implementing LZW encoding is straightforward, given in Algorithm 5.11 on the facing page (the implementation of expand() is on the next page).
 
 ```
+public static void expand() {
+	String[] st=new String[L];
+	
+	int i;
+	
+	for(i=0;i<R;i++) {
+		st[i]=""+(char)i;
+	}
+	st[i++]=" ";
+	
+	int codeword=BinaryStdIn.readInt(W);
+	String val=st[codeword];
+	while(true) {
+		BinaryStdOut.write(val);
+		codeword=BinaryStdIn.readInt(W);
+		if(codeword==R)
+			break;
+		String s=st[codeword];
+		if(i==codeword) {
+			s=val+val.charAt(0);
+		}
+		if(i<L) {
+			st[i++]=val+s.charAt(0);
+		}
+		val=s;
+	}
+	BinaryStdOut.close();
+}
 ```
