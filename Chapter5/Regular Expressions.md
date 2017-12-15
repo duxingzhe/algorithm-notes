@@ -329,7 +329,7 @@ We push the RE index of each left parenthesis on the stack. Each time we encount
 
 ##### Closure
 
-A closure (*) operator must occur either (i ) after a single character, when we add -transitions to and from the character, or (ii ) after a right parenthesis, when we add -transitions to and from the corresponding left parenthesis, the one at the top of the stack.
+A closure (*) operator must occur either (i) after a single character, when we add -transitions to and from the character, or (ii) after a right parenthesis, when we add -transitions to and from the corresponding left parenthesis, the one at the top of the stack.
 
 ##### Or expression
 

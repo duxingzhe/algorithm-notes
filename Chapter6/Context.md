@@ -304,3 +304,106 @@ As described at the outset, our interest in event-driven simulation is to avoid 
 ##### Proposition A
 
 An event-based simulation of N colliding particles requires at most N 2 priority queue operations for initialization, and at most N priority queue operations per collision (with one extra priority queue operation for each invalid collision).
+
+#### B-trees
+
+Searching is a fundamental operation on huge data sets, and such searching consumes a significant fraction of the resources used in many computing environments. With the advent of the web, we have the ability to access a vast amount of information that might be relevant to a task—our challenge is to be able to search through it efficiently. In this section, we describe a further extension of the balanced-tree algorithms from Section 3.3 that can support external search in symbol tables that are kept on a disk or on the web and are thus potentially far larger than those we have been considering (which have to fit in addressable memory).
+
+##### Cost model
+
+Data storage mechanisms vary widely and continue to evolve, so we use a simple model to capture the essentials. We use the term page to refer to a contiguous block of data and the term probe to refer to the first access to a page. We assume that accessing a page involves reading its contents into local memory, so that subsequent accesses are relatively inexpensive.
+
+##### B-tree cost model
+
+When studying algorithms for external searching, we count page accesses (the number of times a page is accessed, for read or write).
+
+##### B-trees
+
+The approach is to extend the 2-3 tree data structure described in Section 3.3, with a crucial difference: rather than store the data in the tree, we build a tree with copies of the keys, each key copy associated with a link. This approach enables us to more easily separate the index from the table itself, much like the index in a book.
+
+##### Conventions
+
+To illustrate the basic mechanisms, we consider an (ordered) SET implementation (with keys and no values). Extending to provide an ordered ST to associate keys with values is an instructive exercise (see Exercise 6.16). Our goal is to support add() and contains() for a set of keys that could be huge.
+
+In external searching applications, it is common to keep the index separate from the data. For B-trees, we do so by using two different kinds of nodes:
+
+* Internal nodes, which associate copies of keys with pages
+* External nodes, which have references to the actual data
+
+##### Search and insert
+
+Search in a B-tree is based on recursively searching in the unique subtree that could contain the search key.
+
+As with 2-3 trees, we can use recursive code to insert a new key at the bottom of the tree.
+
+##### Definition
+
+A B-tree of order M (where M is an even positive integer) is a tree that either is an external k-node (with k keys and associated information) or comprises internal k-nodes (each with k keys and k links to B-trees representing each of the k intervals delimited by the keys), having the following structural properties: every path from the root to an external node must be the same length ( perfect balance); and k must be between 2 and M-1 at the root and between M/2 and M-1 at every other node.
+
+##### Representation
+
+As just discussed, we have a great deal of freedom in choosing concrete representations for nodes in B-trees.We encapsulate these choices in a Page API that associates keys with links to Page objects and supports the operations that we need to test for overfull pages, split them, and distinguish between internal and external pages. You can think of a Page as a symbol table, kept externally (in a file on your computer or on the web). The terms open and close in the API refer to the process of bringing an external page into internal memory and writing its contents back out (if necessary).
+
+With these preparations, the code for BTreeSET on page 872 is remarkably simple. For contains(), we use a recursive method that takes a Page as argument and handles three cases:
+
+* If the page is external and the key is in the page, return true.
+* If the page is external and the key is not in the page, return false.
+* Otherwise, do a recursive call for the subtree that could contain the key.
+
+##### Performance
+
+The most important property of B-trees is that for reasonable values of the parameter M the search cost is constant, for all practical purposes:
+
+##### Proposition B
+
+A search or an insertion in a B-tree of order M with N items requires between ![](http://latex.codecogs.com/gif.latex?log_{M}N) and ![](http://latex.codecogs.com/gif.latex?log_{\frac{M}{2}N) probes—a constant number, for practical purposes.
+
+##### Space
+
+The space usage of B-trees is also of interest in practical applications. By construction, the pages are at least half full, so, in the worst case, B-trees use about double the space that is absolutely necessary for keys, plus extra space for links.
+
+```
+public class BTreeSET<Key extends Comparable<Key>> {
+	private Page root=new Page(true);
+	
+	public BTreeSET(Key sentinel) {
+		put(sentinel);
+	}
+	
+	public boolean contains(Key key) {
+		return contains(root,key);
+	}
+	
+	private boolean contains(Page h, Key key) {
+		if(h.isExternal())
+			return h.contains(key);
+		return contains(h.next(key),key);
+	}
+	
+	public void add(Key key) {
+		put(root, key);
+		if(root.isFull()) {
+			Page lefthalf=root;
+			Page righthalf=root.split();
+			root=new Page(false);
+			root.put(lefthalf);
+			root.put(righthalf);
+		}
+	}
+	
+	public void add(Page h,Key key) {
+		if(h.isExternal()) {
+			h.put(key);
+			return;
+		}
+		
+		Page next=h.next(key);
+		put(next,key);
+		if(next.isFull()) {
+			h.put(next.split());
+		}
+		next.close();
+	}
+
+}
+```
