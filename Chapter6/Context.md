@@ -356,7 +356,7 @@ The most important property of B-trees is that for reasonable values of the para
 
 ##### Proposition B
 
-A search or an insertion in a B-tree of order M with N items requires between ![](http://latex.codecogs.com/gif.latex?log_{M}N) and ![](http://latex.codecogs.com/gif.latex?log_{\frac{M}{2}N) probes—a constant number, for practical purposes.
+A search or an insertion in a B-tree of order M with N items requires between ![](http://latex.codecogs.com/gif.latex?log_{M}N) and ![](http://latex.codecogs.com/gif.latex?log_{\frac{M}{2}}N) probes—a constant number, for practical purposes.
 
 ##### Space
 
