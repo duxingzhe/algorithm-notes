@@ -407,3 +407,102 @@ public class BTreeSET<Key extends Comparable<Key>> {
 
 }
 ```
+
+#### Suffix arrays
+
+Efficient algorithms for string processing play a critical role in commercial applications and in scientific computing. From the countless strings that define web pages that are searched by billions of users to the extensive genomic databases that scientists are studying to unlock the secret of life, computing applications of the 21st century are increasingly string-based. As usual, some classic algorithms are effective, but remarkable new algorithms are being developed.
+
+##### Longest repeated substring
+
+What is the longest substring that appears at least twice in a given string? For example, the longest repeated substring in the string "to be or not to be" is the string "to be". Think briefly about how you might solve it. Could you find the longest repeated substring in a string that has millions of characters? This problem is simple to state and has many important applications, including data compression, cryptography, and computer-assisted music analysis.
+
+##### Brute-force solution
+
+As a warmup, consider the following simple task: given two strings, find their longest common prefix (the longest substring that is a prefix of both strings).
+
+```
+private static int lcp(String s, String t)
+{
+	int N=Math.min(s.length(), t.length());
+	for(int i=0;i<N;i++)
+		if(s.charAt(i)!=t.charAt(i))
+			return i;
+	return N;
+}
+```
+
+##### Suffix sort solution
+
+The following clever approach, which takes advantage of sorting in an unexpected way, is an effective way to find the longest repeated substring, even in a huge string: we use Java’s substring() method to make an array of strings that consists of the suffixes of s (the substrings starting at each position and going to the end), and then we sort this array. The key to the algorithm is that every substring appears somewhere as a prefix of one of the suffixes in the array.
+
+##### Indexing a string
+
+When you are trying to find a particular substring within a large text—for example, while working in a text editor or within a page you are viewing with a browser—you are doing a substring search, the problem we considered in Section 5.3. For that problem, we assume the text to be relatively large and focus on preprocessing the substring, with the goal of being able to efficiently find that substring in any given text. When you type search keys into your web browser, you are doing a search with string keys, the subject of Section 5.2. Your search engine must precompute an index, since it cannot afford to scan all the pages in the web for your keys. As we discussed in Section 3.5 (see FileIndex on page 501), this would ideally be an inverted index associating each possible search string with all web pages that contain it—a symbol table where each entry is a string key and each value is a set of pointers (each pointer giving the information necessary to locate an occurrence of the key on the web—perhaps a URL that names a web page and an integer offset within that page).
+
+##### API and client code
+
+```
+public class LRS {
+	
+	public static void main(String[] args) {
+		String text=StdIn.readAll();
+		int N=text.length();
+		SuffixArray sa=new SuffixArray(text);
+		String lrs="";
+		for(int i=1;i<N;i++) {
+			int length=sa.lcp(i);
+			if(length>substring.length())
+				lrs=sa.select(i).substring(0,length);
+		}
+		StdOut.println(lrs);
+	}
+
+}
+```
+
+```
+public class KWIC {
+	
+	public static void main(String[] args) {
+		In in=new In(args[0]);
+		int context=Integer.parseInt(args[1]);
+		
+		String text=in.readAll().repaceAll("\\s+"," ");
+		int N=text.length();
+		SuffixArray sa=new SuffixArray(text);
+		
+		while(StdIn.hasNextLine()) {
+			String q=StdIn.readLine();
+			for(int i=sa.randk(q);i<N&&sa.select(i).startsWith(q);i++) {
+				int from=Math.max(0,sa.index(i)-context);
+				int to=Math.min(N-1, from+q.length()+2*context);
+				StdOut.println(text.substring(from,to));
+			}
+			StdOut.println(text.substring(from,to));
+		}
+	}
+
+}
+```
+
+##### Implementation
+
+The code on the facing page is a straightforward implementation of the SuffixArray API. Its instance variables are an array of strings and (for economy in code) a variable N that holds the length of the array (the length of the string and its number of suffixes).
+
+##### Performance 
+
+The efficiency of suffix sorting depends on the fact that Java substring extraction uses a constant amount of space—each substring is composed of standard object overhead, a pointer into the original, and a length. Thus, the size of the index is linear in the size of the string. This point is a bit counterintuitive because the total number of characters in the suffixes is ~![](http://latex.codecogs.com/gif.latex?\frac{N^2}{2}), a quadratic function of the size of the string. Moreover, that quadratic factor gives one pause when considering the cost of sorting the suffix array.
+
+##### Proposition C
+
+Using 3-way string quicksort, we can build a suffix array from a random string of length N with space proportional to N and ~ ![](http://latex.codecogs.com/gif.latex?2NlnN) character compares, on the average.
+
+Improved implementations
+
+Our elementary implementation of SuffixArray has poor worst-case performance. For example, if all the characters are equal, the sort examines every character in each substring and thus takes quadratic time. For strings of the type we have been using as examples, such as genomic sequences or natural-language text, this is not likely to be problematic, but the algorithm can be slow for texts with long runs of identical characters. Another way of looking at the problem is to observe that the cost of finding the longest repeated substring is quadratic in the length of the substring because all of the prefixes of the repeat need to be checked (see the diagram at right).
+
+With a bit more work, the Manber-Myers implementation can also support a two-argument lcp() that finds the longest common prefix of two given suffixes that are not necessarily adjacent in guaranteed constant time, again a remarkable improvement over the straightforard implementation. These results are quite surprising, as they achieve efficiencies quite beyond what you might have expected.
+
+##### Proposition D
+
+With suffix arrays, we can solve both the suffix sorting and longest repeated substring problems in linear time.
