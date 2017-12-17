@@ -506,3 +506,124 @@ With a bit more work, the Manber-Myers implementation can also support a two-arg
 ##### Proposition D
 
 With suffix arrays, we can solve both the suffix sorting and longest repeated substring problems in linear time.
+
+#### Network-flow algorithms
+
+The study of network-flow algorithms is fascinating because it brings us tantalizingly close to compact and elegant implementations that achieve both goals. As you will see, we have straightforward implementations that are guaranteed to run in time proportional to a polynomial in the size of the network.
+
+##### A physical model
+
+We begin with an idealized physical model in which several of the basic concepts are intuitive. Specifically, imagine a collection of interconnected oil pipes of varying sizes, with switches controlling the direction of flow at junctions, as in the example illustrated at right. Suppose further that the network has a single source (say, an oil field) and a single sink (say, a large refinery) to which all the pipes ultimately connect.
+
+##### Definitions
+
+Because of this broad applicability, it is worthwhile to consider precise statements of the terms and concepts that we have just informally introduced:
+
+##### Definition
+
+A flow network is an edge-weighted digraph with positive edge weights (which we refer to as capacities). An st-flow network has two identified vertices, a source s and a sink t.
+
+##### Definition
+
+An an st-flow network is a set of nonnegative values associated with each edge, which we refer to as edge flows. We say that a flow is feasible if it satisfies the condition that no edge’s flow is greater than that edge’s capacity and the local equilibrium condition that the every vertex’s netflow is zero (except s and t).
+
+With these definitions, the formal statement of our basic problem is straightforward:
+
+Maximum st-flow. Given an st-flow network, find an st-flow such that no other flow from s to t has a larger value.
+
+##### APIs
+
+```
+```
+
+##### Ford-Fulkerson algorithm
+
+It is a generic method for increasing flows incrementally along paths from source to sink that serves as the basis for a family of algorithms. It is known as the Ford-Fulkerson algorithm in the classical literature; the more descriptive term augmenting-path algorithm is also widely used. Consider any directed path from source to sink through an st-flow network.
+
+##### Ford-Fulkerson maxflow algorithm
+
+Start with zero flow everywhere. Increase the flow along any augmenting path from source to sink (with no full forward edges or empty backward edges), continuing until there are no such paths in the network.
+
+##### Maxflow-mincut theorem
+
+To show that any flow computed by any implementation of the Ford-Fulkerson algorithm is indeed a maxflow, we prove a key fact known as the maxflow-mincut theorem.
+
+##### Definition
+
+An s in one of its sets and vertex t in the other.
+
+If we view the capacity of the cut as the cost of doing so, to stop the flow in the most economical manner is to solve the following problem:
+
+Minimum st-cut. Given an st-network, find an st-cut such that the capacity of no other cut is smaller. For brevity, we refer to such a cut as a mincut and to the problem of finding one in a network as the mincut problem.
+
+##### Proposition E
+
+For any st-flow, the flow across each st-cut is equal to the value of the flow.
+
+##### Corollary
+
+The outflow from s is equal to the inflow to t (the value of the st-flow).
+
+##### Corollary
+
+No st-fl ow’s value can exceed the capacity of any st-cut.
+
+##### Proposition F ( Maxflow-mincut theorem)
+
+Let f be an st-flow. The following three conditions are equivalent:
+
+i. There exists an st-cut whose capacity equals the value of the flow f.
+ii. f is a maxflow.
+iii. There is no augmenting path with respect to f.
+
+##### Corollary ( Integrality property)
+
+When capacities are integers, there exists an integer-valued maxflow, and the Ford-Fulkerson algorithm finds it.
+
+##### Definition
+
+Given a st-flow network and an st-flow, the residual network for the flow has the same vertices as the original and one or two edges in the residual network for each edge in the original, defined as follows: For each edge e from v to w in the original, let ![](http://latex.codecogs.com/gif.latex?f_e) be its flow and ce its capacity. If ![](http://latex.codecogs.com/gif.latex?f_e) is positive, include an edge w->v in the residual with capacity ![](http://latex.codecogs.com/gif.latex?f_e) ; and if ![](http://latex.codecogs.com/gif.latex?f_e) is less than ![](http://latex.codecogs.com/gif.latex?c_e), include an edge v->w in the residual with capacity ![](http://latex.codecogs.com/gif.latex?c_e)-![](http://latex.codecogs.com/gif.latex?f_e).
+
+```
+```
+
+##### Shortest-augmenting-path method
+
+Perhaps the simplest Ford-Fulkerson implementation is to use a shortest augmenting path (as measured by the number of edges on the path, not flow or capacity).
+
+In this case, the search for an augmenting path amounts to breadth-first search (BFS) in the residual network, precisely as described in Section 4.1, as you can see by comparing the hasAugmentingPath() implementation below to our breadth-first search implemention in Algorithm 4.2 on page 540 (the residual graph is a digraph, and this is fundamentally a digraph processing algorithm, as mentioned on page 685).
+
+```
+```
+
+```
+```
+
+##### Performance
+
+A larger example is shown in the figure above. As is evident from the figure, the lengths of the augmenting paths form a nondecreasing sequence. This fact is a first key to analyzing the performance of the algorithm.
+
+##### Proposition G
+
+The number of augmenting paths needed in the shortest-augmenting-path implementation of the Ford-Fulkerson maxflow algorithm for a flow network with V vertices and E edges is at most ![](http://latex.codecogs.com/gif.latex?\frac{EV}{2}).
+
+###### Corollary
+
+The shortest-augmenting-path implementation of the Ford-Fulkerson maxflow algorithm takes time proportional to VE 2/2 in the worst case.
+
+##### Other implementations
+
+Another Ford-Fulkerson implementation, suggested by Edmonds and Karp, is the following: Augment along the path that increases the flow by the largest amount.
+
+A complete analysis establishing which method is best is a complex task, because their running times depend on
+
+* The number of augmenting paths needed to fi nd a maxflow
+* The time needed to fi nd each augmenting path
+
+<table>
+	<tr>
+		<th></th>
+		<th></th>
+	</tr>
+</table>
+Performance characteristics of maxflow algorithms
