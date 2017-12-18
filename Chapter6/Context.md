@@ -534,6 +534,34 @@ Maximum st-flow. Given an st-flow network, find an st-flow such that no other fl
 ##### APIs
 
 ```
+private boolean localEq(FlowNetwork G, int v) {
+	double EPSILON=1E-11;
+	double netflow=0.0;
+	for(FlowEdge e: G.adj(v)) {
+		if(v==e.from())
+			netflow-=e.flow();
+		else
+			netflow+=e.flow();
+	}
+	return Math.abs(netflow)<EPSILON;
+}
+
+private boolean isFeasible(FlowNetwork G) {
+	for(int v=0;v<G.V();v++) {
+		flow(FlowEdge e: G.adj(v)){
+			if(e.flow()<0||e.flow()>e.cap()) {
+				return false;
+			}
+		}
+	}
+	
+	for(int v=0;v<G.V();v++) {
+		if(v!=s&&v!=t&&!localEq(v))
+			return false;
+	}
+	
+	return true;
+}
 ```
 
 ##### Ford-Fulkerson algorithm
@@ -585,6 +613,60 @@ When capacities are integers, there exists an integer-valued maxflow, and the Fo
 Given a st-flow network and an st-flow, the residual network for the flow has the same vertices as the original and one or two edges in the residual network for each edge in the original, defined as follows: For each edge e from v to w in the original, let ![](http://latex.codecogs.com/gif.latex?f_e) be its flow and ce its capacity. If ![](http://latex.codecogs.com/gif.latex?f_e) is positive, include an edge w->v in the residual with capacity ![](http://latex.codecogs.com/gif.latex?f_e) ; and if ![](http://latex.codecogs.com/gif.latex?f_e) is less than ![](http://latex.codecogs.com/gif.latex?c_e), include an edge v->w in the residual with capacity ![](http://latex.codecogs.com/gif.latex?c_e)-![](http://latex.codecogs.com/gif.latex?f_e).
 
 ```
+public class FlowEdge {
+
+	private final int v;
+	private final int w;
+	private final double capacity;
+	private double flow;
+	
+	public FlowEdge(int v,int w, double capacity) {
+		this.v=v;
+		this.w=w;
+		this.capacity=capacity;
+		this.flow=0.0;
+	}
+	
+	public int from() {
+		return v;
+	}
+	
+	public int to() {
+		return w;
+	}
+	
+	public double capacity() {
+		return capacity;
+	}
+	
+	public double flow() {
+		return flow;
+	}
+	
+	public int other(int vertex)
+	
+	public double residualCapacityTo(int vertex) {
+		if(vertex==v)
+			return flow;
+		else if(vertex==w)
+			return cap-flow;
+		else
+			throw new RuntimeException("Inconsistent edge");
+	}
+	
+	public void addResidualFlowTo(int vertex, double delta) {
+		if(vertex==v) {
+			flow-=delta;
+		}else if(vertex==w) {
+			flow+=delta;
+		}else
+			throw new RuntimeException("Inconsistent edge");
+	}
+	
+	public String toString() {
+		return String.format("%d->%d %.2f %.2f", v,w,capacity,flow);
+	}
+}
 ```
 
 ##### Shortest-augmenting-path method
@@ -594,9 +676,68 @@ Perhaps the simplest Ford-Fulkerson implementation is to use a shortest augmenti
 In this case, the search for an augmenting path amounts to breadth-first search (BFS) in the residual network, precisely as described in Section 4.1, as you can see by comparing the hasAugmentingPath() implementation below to our breadth-first search implemention in Algorithm 4.2 on page 540 (the residual graph is a digraph, and this is fundamentally a digraph processing algorithm, as mentioned on page 685).
 
 ```
+private boolean hasAugmentingPath(FlowNetwork G,int s, int t) {
+	marked=new boolean[G.V()];
+	edgeTo=new FlowEdge[G.V()];
+	Queue<Integer> q=new Queue<Integer>();
+	
+	marked[s]=true;
+	q.enqueue(s);
+	while(!q.isEmpty()) {
+		int v=q.dequeue();
+		for(FlowEdge e:G.adj(v)) {
+			int w=e.other(v);
+			if(e.residualCapacityTo(w)>0&&!marked[w]) {
+				edgeTo[w]=e;
+				marked[w]=true;
+				q.enqueue(w);
+			}
+		}
+	}
+}
 ```
 
 ```
+public class FordFulkerson {
+
+	private boolean[] marked;
+	private FlowEdge[] edgeTo;
+	private double value;
+	
+	public FordFulkerson(FlowNetwork G, int s, int t) {
+		while(hasAugmentingPath(G,s,t)) {
+			double bottle=Double.POSITIVE_INFINITY;
+			for(int v=t;v!=s;v=edgeTo[v].other(v))
+				bottle=Math.min(bottle, edgeTo[v].residualCapacityTo(v));
+			
+			for(int v=t;v!=s;v=edgeTo[v].other(v))
+				edgeTo[v].addResidualFlowTo(v, bottle);
+			
+			value+=bottle;
+		}
+	}
+	
+	public double value() {
+		return value;
+	}
+	
+	public boolean inCut(int v) {
+		return marked[v];
+	}
+	
+	public static void main(String[] args) {
+		FlowNetwork G=new FlowNetwork(new In(args[0]));
+		int s=0,t=G.V()-1;
+		FordFulkerson maxflow=new FordFulkerson(G,s,t);
+		for(int v=0;v<G.V();v++) {
+			for(FlowEdge e: G.adj(v)) {
+				if((v==e.from())&&e.flow()>0)
+					StdOut.println("   "+e);
+			}
+		}
+		StdOut.println("Max flow value=" + maxflow.value());
+	}
+}
 ```
 
 ##### Performance
@@ -622,8 +763,24 @@ A complete analysis establishing which method is best is a complex task, because
 
 <table>
 	<tr>
-		<th></th>
-		<th></th>
+		<th>algorithm</th>
+		<th>worst-case order of growth of running time for V vertices and E edges with integral capacities (max C)</th>
+	</tr>
+	<tr>
+		<th>Ford-Fulkerson shortest augmenting path</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?VE^2></img></th>
+	</tr>
+	<tr>
+		<th>Ford-Fulkerson maximal augmenting path</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?E^2logC</th>
+	</tr>
+	<tr>
+		<th>preflow-push</th>
+		<th><img src=http://latex.codecogs.com/gif.latex?EVlog{\frac{E}{V^2}}></img></th>
+	</tr>
+	<tr>
+		<th>possible?</th>
+		<th>V+E?</img></th>
 	</tr>
 </table>
 Performance characteristics of maxflow algorithms
