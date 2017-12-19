@@ -784,3 +784,105 @@ A complete analysis establishing which method is best is a complex task, because
 	</tr>
 </table>
 Performance characteristics of maxflow algorithms
+
+#### Reduction
+
+In several cases (many of which are listed below), we have found it convenient to solve a problem by formulating it as an instance of another problem that we have already solved.
+
+##### Definition
+
+We say that a problem A reduces to another problem B if we can use an algorithm that solves B to develop an algorithm that solves A.
+
+##### Sorting reductions
+
+We first encountered reduction in Chapter 2, to express the idea that an efficient sorting algorithm is useful for efficiently solving many other problems, that may not seem to be at all related to sorting.
+
+Finding the median. Given a set of numbers, find the median value.
+
+Distinct values. Determine the number of distinct values in a set of numbers.
+
+Scheduling to minimize average completion time. Given a set of jobs of specified duration to be completed, how can we schedule the jobs on a single processor so as to minimize their average completion time?
+
+##### Proposition H
+
+The following problems reduce to sorting:
+
+* Finding the median
+* Counting distinct values
+* Scheduling to minimize average completion time
+
+Sorting is valuable for three reasons:
+
+* It is useful in its own right.
+* We have an effi cient algorithms for solving it.
+* Many problems reduce to it.
+
+##### Shortest-paths reductions
+
+In Section 4.4, we revisited the idea of reduction in the context of shortest-paths algorithms. We considered the following problems, among many others:
+
+Single-source shortest paths in undirected graphs. Given an edge-weighted undirected graph with nonnegative weights and a source vertex s, support queries of the form Is there a path from s to a given target vertex v? If so, find a shortest such path (one whose total weight is minimal).
+
+Parallel precedence-constrained scheduling. Given a set of jobs of specified duration to be completed, with precedence constraints that specify that certain jobs have to be completed before certain other jobs are begun, how can we schedule the jobs on identical processors (as many as needed) such that they are all completed in the minimum amount of time while still respecting the constraints?
+
+Arbitrage. Find an arbitrage opportunity in a given table of currency-conversion rates.
+
+##### Proposition I
+
+The following problems reduce to shortest paths in weighted digraphs:
+
+* Single-source shortest paths in undirected graphs with nonnegative weights
+* Parallel precedence-constrained scheduling
+* Arbitrage
+* [many other problems]
+
+##### Maxflow reductions
+
+Maxflow algorithms are also important in a broad context. We can remove various restrictions on the flow network and solve related flow problems; we can solve other network- and graph-processing problems; and we can solve problems that are not network problems at all.
+
+Job placement. A college’s job-placement office arranges interviews for a set of students with a set of companies; these interviews result in a set of job offers. Assuming that an interview followed by a job offer represents mutual interest in the student taking a job at the company, it is in everyone’s best interests to maximize the number of job placements. Is it possible to match every student with a job? What is the maximum number of jobs that can be filled?
+
+Product distribution. A company that manufactures a single product has factories, where the product is produced; distribution centers, where the product is stored temporarily; and retail outlets, where the product is sold. The company must distribute the product from factories through distribution centers to retail outlets on a regular basis, using distribution channels that have varying capacities. Is it possible to get the product from the warehouses to the retail outlets such that supply meets demand everywhere?
+
+Network reliability. A simplified model considers a computer network as consisting of a set of trunk lines that connect computers through switches such that there is the possibility of a switched path through trunk lines connecting any two given computers. What is the minimum number of trunk lines that can be cut to disconnect some pair of computers?
+
+Proposition J
+
+The following problems reduce to the maxflow problem:
+
+* Job placement
+* Product distribution
+* Network reliability
+* [many other problems]
+
+Shortest paths and maxflow are important problem-solving models because they have the same properties that we articulated for sorting:
+
+* They are useful in their own right.
+* We have effi cient algorithms for solving them.
+* Many problems reduce to them.
+
+This short discussion serves only to introduce the idea.
+
+##### Linear programming
+
+One of the cornerstones of operations research is linear programming (LP). It refers to the idea of reducing a given problem to the following mathematical formulation:
+
+Linear programming. Given a set of M linear inequalities and linear equations involving N variables, and a linear objective function of the N variables, find an assignment of values to the variables that maximizes the objective function, or report that no feasible assignment exists.
+
+Linear programming is an extremely important problem-solving model because
+
+* A great many important problems reduce to linear programming
+* We have effi cient algorithms for solving linear-programming problems
+
+##### Proposition K
+
+The following problems reduce to linear programming
+
+* Maxflow
+* Shortest paths
+* [many, many other problems]
+
+What sorts of problems do not reduce to linear programming? Here is an example of such a problem:
+
+Load balancing. Given a set of jobs of specified duration to be completed, how can we schedule the jobs on two identical processors so as to minimize the completion time of all the jobs?
+
