@@ -846,7 +846,7 @@ Product distribution. A company that manufactures a single product has factories
 
 Network reliability. A simplified model considers a computer network as consisting of a set of trunk lines that connect computers through switches such that there is the possibility of a switched path through trunk lines connecting any two given computers. What is the minimum number of trunk lines that can be cut to disconnect some pair of computers?
 
-Proposition J
+##### Proposition J
 
 The following problems reduce to the maxflow problem:
 
@@ -886,3 +886,157 @@ What sorts of problems do not reduce to linear programming? Here is an example o
 
 Load balancing. Given a set of jobs of specified duration to be completed, how can we schedule the jobs on two identical processors so as to minimize the completion time of all the jobs?
 
+#### Intractability
+
+The practical utility of most of the algorithms is obvious, and for many problems we have the luxury of several efficient algorithms to choose from. Unfortunately, many other problems arise in practice that do not admit such efficient solutions. What’s worse, for a large class of such problems we cannot even tell whether or not an efficient solution exists. This state of affairs has been a source of extreme frustration for programmers and algorithm designers, who cannot find any efficient algorithm for a wide range of practical problems, and for theoreticians, who have been unable to find any proof that these problems are difficult.
+
+##### Groundwork
+
+One of the most beautiful and intriguing intellectual discoveries of the 20th century, developed by A. Turing in the 1930s, is the Turing machine, a simple model of computation that is general enough to embody any computer program or computing device.
+
+Turing machines form the foundation of theoretical computer science, starting with the following two ideas:
+
+* Universality . All physically realizable computing devices can be simulated by a Turing machine. This idea is known as the Church-Turing thesis. This is a statement about the natural world and cannot be proven (but it can be falsified). The evidence in favor of the thesis is that mathematicians and computer scientists have developed numerous models of computation, but they all have been proven equivalent to the Turing machine.
+* Computability . There exist problems that cannot be solved by a Turing machine (or by any other computing device, by universality). This is a mathematical truth. The halting problem (no program can guarantee to determine whether a given program will halt) is a famous example of such a problem.
+
+In the present context, we are interested in a third idea, which speaks to the efficiency of computing devices:
+
+* Extended Church-Turing thesis. The order of growth of the running time of a program to solve a problem on any computing device is within a polynomial factor of some program to solve the problem on a Turing machine (or any other computing device).
+
+##### Exponential running time
+
+The purpose of the theory of intractability is to separate problems that can be solved in polynomial time from problems that (probably) require exponential time to solve in the worst case. It is useful to think of an exponential-time algorithm as one that, for some input of size N, takes time proportional to 2N (at least). The substance of the argument does not change if we replace 2 by any number  > 1.
+
+Shortest-path length. What is the length of the shortest path from a given vertex s to a given vertex t in a given graph?
+
+Longest-path length. What is the length of the longest simple path from a given vertex s to a given vertex t in a given graph?
+
+```
+public class LongestPath {
+	private boolean[] marked;
+	private int max;
+	
+	public LongestPath(Graph G, int s, int t) {
+		marked=new boolean[G.V()];
+		dfs(G,s,t,0);
+	}
+	
+	private void dfs(Graph G, int v,int t,int i) {
+		if(v==t&&i>max)
+			max=i;
+		if(v==t)
+			return;
+		marked[v]=true;
+		for(int w: G.adj(v))
+			if(!marked[w])
+				dfs(G,w,t,i+1);
+		marked[v]=false;
+	}
+	
+	public int maxLength() {
+		return max;
+	}
+}
+```
+
+##### Search problems
+
+The great disparity between problems that can be solved with “efficient” algorithms of the type we have been studying in this book and problems where we need to look for a solution among a potentially huge number of possibilities makes it possible to study the interface between them with a simple formal model. The first step is to characterize the type of problem that we study:
+
+##### Definition
+
+A search problem is a problem having solutions with the property that the time needed to certify that any solution is correct is bounded by a polynomial in the size of the input. We say that an algorithm solves a search problem if, given any input, it either produces a solution or reports that none exists.
+
+The name NP is commonly used to describe search problems—we will describe the reason for the name on page 914:
+
+##### Definition
+
+NP is the set of all search problems.
+
+Linear equation satisfiability. Given a set of M linear equations involving N variables, find an assignment of values to the variables that satisfies all of the equations, or report that none exists.
+Linear inequality satisfiability (search formulation of linear programming). Given a set of M linear inequalities involving N variables, find an assignment of values to the variables that satisfies all of the inequalities, or report that none exists.
+0-1 integer linear inequality satisfiability (search formulation of 0-1 integer linear programming). Given a set of M linear inequalities involving N integer variables, find an assignment of the values 0 or 1 to the variables that satisfies all of the inequalities, or report that none exists.
+Boolean satisfiability. Given a set of M equations involving and and or operations on N boolean variables, find an assignment of values to the variables that satisfies all of the equations, or report that none exists.
+
+Selected search problems
+
+##### Other types of problems
+
+The concept of search problems is one of many ways to characterize the set of problems that form the basis of the study of intractability. Other possibilities are decision problems (does a solution exist?) and optimization problems (what is the best solution)?
+
+##### Easy search problems
+
+The definition of NP says nothing about the difficulty of finding the solution, just certifying that it is a solution. The second of the two sets of problems that form the basis of the study of intractability, which is known as P, is concerned with the difficulty of finding the solution.
+
+##### Definition
+
+P is the set of all search problems that can be solved in polynomial time.
+
+##### Nondeterminism
+
+The N in NP stands for nondeterminism. It represents the idea that one way (in theory) to extend the power of a computer is to endow it with the power of nondeterminism: to assert that when an algorithm is faced with a choice of several options, it has the power to “guess” the right one.
+
+##### The main question
+
+Nondeterminism is such a powerful notion that it seems almost absurd to consider it seriously.
+
+Does N=NP?
+
+Other ways of posing the question shed light on its fundamental nature:
+
+* Are there any hard-to-solve search problems?
+* Would we be able to solve some search problems more efficiently if we could build a nondeterministic computing device?
+
+Poly-time reductions. Recall from page 903 that we show that a problem A reduces to another problem B by demonstrating that we can solve any instance of A in three steps:
+
+* Transform it to an instance of B.
+* Solve that instance of B.
+* Transform the solution of B to be a solution of A.
+
+##### Proposition L
+
+Boolean satisfi ability poly-time reduces to 0-1 integer linear inequality satisfiability.
+
+##### Corollary
+
+If satisfi ability is hard to solve, then so is integer linear programming.
+
+##### NP-completeness
+
+Remarkably, all of these many, many problems have an additional property that provides convincing evidence that P ![](http://latex.codecogs.com/gif.latex?\neq) NP :
+
+##### Definition
+
+A search problem A is said to be NP-complete if all problems in NP polytime reduce to A.
+
+##### Cook-Levin theorem
+
+Reduction uses the NP-completeness of one problem to imply the NP-completeness of another. But reduction cannot be used in one case: how was the first problem proven to be NP-complete?
+
+##### Proposition M (Cook-Levin theorem)
+
+Boolean satisfiability is NP-complete.
+
+##### Classifying problems
+
+Classifying problems as being easy to solve (in P) or hard to solve (NP-complete) can be:
+
+* Straightforward. For example, the venerable Gaussian elimination algorithm proves that linear equation satisfiability is in P.
+* Tricky but not difficult. For example, developing a proof like the proof of Proposition A takes some experience and practice, but it is easy to understand.
+* Extremely challenging. For example, linear programming was long unclassified, but Khachian’s ellipsoid algorithm proves that linear programming is in P.
+* Open. For example, graph isomorphism (given two graphs, find a way to rename the vertices of one to make it identical to the other) and factor (given an integer, find a nontrivial factor) are still unclassified.
+
+Boolean satisfiability. Given a set of M equations involving N boolean variables, find an assignment of values to the variables that satisfies all of the equations, or report that none exists.
+Integer linear programming. Given a set of M linear inequalities involving N integer variables, find an assignment of values to the variables that satisfies all of the inequalities, or report that none exists.
+Load balancing. Given a set of jobs of specified duration to be completed and a time bound T, how can we schedule the jobs on two identical processors so as to complete them all by time T?
+Vertex cover. Given a graph and a integer C, find a set of C vertices such that each edge of the graph is incident to at least one vertex of the set.
+Hamiltonian path. Given a graph, find a simple path that visits each vertex exactly once, or report that none exists.
+Protein folding. Given energy level M, find a folded three-dimensional conformation of a protein having potential energy less than M.
+Ising model. Given an Ising model on a lattice of dimension three and an energy threshhold E, is there a subgraph with free energy less than E ?
+Risk portfolio of a given return. Given an investment portfolio with a given total cost, a given return, risk values assigned to each investment, and a threshold M, find a way to allocate the investments such that the risk is less than M.
+
+Some famous NP-complete problems
+
+##### Coping with NP-completeness
+
+Some sort of solution to this vast panopoly of problems must be found in practice, so there is intense interest in finding ways to address them. It is impossible to do justice to this vast field of study in one paragraph, but we can briefly describe various approaches that have been tried. One approach is to change the problem and find an “approximation” algorithm that finds not the best solution but a solution guaranteed to be close to the best.
