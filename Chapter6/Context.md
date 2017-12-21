@@ -976,6 +976,72 @@ P is the set of all search problems that can be solved in polynomial time.
 
 The N in NP stands for nondeterminism. It represents the idea that one way (in theory) to extend the power of a computer is to endow it with the power of nondeterminism: to assert that when an algorithm is faced with a choice of several options, it has the power to “guess” the right one.
 
+<table>
+	<tr>
+		<th>problem</th>
+		<th>input</th>
+		<th>description</th>
+		<th>poly-time algorithm</th>
+	</tr>
+	<tr>
+		<th>Hamiltonian path</th>
+		<th>graph G</th>
+		<th>find a simple path that visits every vertex</th>
+		<th>?</th>
+	</tr>
+	<tr>
+		<th>factor</th>
+		<th>integer x</th>
+		<th>find a nontrivial factor of x</th>
+		<th>?</th>
+	</tr>
+	<tr>
+		<th>0-1 linear inequality satisfiability</th>
+		<th>M 0-1 variables N inequalities</th>
+		<th>assign values to the variables that satisfy the inequalities</th>
+		<th>?</th>
+	</tr>
+	<tr>
+		<th>all problems in P</th>
+		<th colspan="3">see table below</th>
+	</tr>
+
+</table>
+
+<table>
+	<tr>
+		<th>problem</th>
+		<th>input</th>
+		<th>description</th>
+		<th>poly-time algorithm</th>
+	</tr>
+	<tr>
+		<th>shortest st-path</th>
+		<th>graph G vertices s,t</th>
+		<th>find the shortest path from s to t</th>
+		<th>BFS</th>
+	</tr>
+	<tr>
+		<th>sorting</th>
+		<th>array x</th>
+		<th>find a permutation that puts a in ascending order</th>
+		<th>mergesort</th>
+	</tr>
+	<tr>
+		<th>linear equation satisfiability</th>
+		<th>M variables N equalities</th>
+		<th>assign values to the variables that satisfy the equation</th>
+		<th>Gaussain elimination</th>
+	</tr>
+	<tr>
+		<th>linear inequality satisfiability</th>
+		<th>M variables N inequalities</th>
+		<th>assign values to the variables that satisfy the inequalities</th>
+		<th>ellipsoid</th>
+	</tr>
+
+</table>
+
 ##### The main question
 
 Nondeterminism is such a powerful notion that it seems almost absurd to consider it seriously.
