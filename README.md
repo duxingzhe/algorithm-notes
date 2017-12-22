@@ -14,7 +14,9 @@ The videos of Introduction to Algorithm have been updated. Please visit:
 
 [Introduction to Algorithm 2011](https://www.youtube.com/playlist?list=PLUl4u3cNGP61Oq3tWYp6V_F-5jb5L2iHb)
 
-[Introduction to Algorithm 2015](https://www.youtube.com/playlist?list=PLUl4u3cNGP6317WaSNfmCvGym2ucw3oGp)
+[Design and Analysis of Algorithms 2015](https://www.youtube.com/playlist?list=PLUl4u3cNGP6317WaSNfmCvGym2ucw3oGp)
+
+[Advanced Algorithms 2016](https://www.youtube.com/playlist?list=PL6ogFv-ieghdoGKGg2Bik3Gl1glBTEu8c)
 
 
 ## Reference book:
