@@ -1,5 +1,6 @@
 Divided Conquer
 
+```
 FIND-MAXIMUM-SUBARRAY(A,low,high)
 if hight==low
     return (low,high, A[low])
@@ -33,6 +34,7 @@ for j=mid+1 to high
         right-sum=sum
         max-right=j
 return (max-left,max-right,left-sum+right-sum)
+```
 
 C++
 
