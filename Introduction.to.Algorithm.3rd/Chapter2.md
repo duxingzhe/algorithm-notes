@@ -2,6 +2,7 @@ Exercise 2.2-2
 
 SELECTION-SORT(A)
 
+```
 n=A.lengeth
 for j=1 to n-1
     smallest=j
@@ -9,6 +10,7 @@ for j=1 to n-1
         if A[i]<A[smallest]
             smallest=i
     exchange A[j] with A[smallest]
+```
 
 ```
 #include <iostream>
