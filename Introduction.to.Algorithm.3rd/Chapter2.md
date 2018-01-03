@@ -93,3 +93,7 @@ void merge_sort(int A[], int p,int r)
     }
 }
 ```
+
+Exercise 2.3-6
+
+显然是不可以的，数组排序中影响时间复杂度的因素有两个，一个是寻找位置时的比较，一个是找到位置后插入操作引起的元素移动，原来这两者的复杂度都是![](http://latex.codecogs.com/gif.latex?\Theta(n^2)),即使用二分法把比较操作降低到了![](http://latex.codecogs.com/gif.latex?\Theta(nlgn))，插入依然没变，最后的复杂度还是![](http://latex.codecogs.com/gif.latex?\Theta(n^2))

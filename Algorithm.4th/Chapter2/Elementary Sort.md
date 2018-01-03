@@ -3,7 +3,7 @@
 sort One of the simplest sorting algorithms works as follows: First, find the smallest item in the array and exchange it with the first entry (itself if the first entry is already the smallest). Then, find the next smallest item and exchange it with the second entry. Continue in this way until the entire array is sorted. This method is called selection sort because it works by repeatedly selecting the smallest remaining item.
 
 #### Proposition A.
-Selection sort uses ![](http://latex.codecogs.com/gif.latex?\frac{N^2}/2) compares and N exchanges to sort an array of length N.
+Selection sort uses ![](http://latex.codecogs.com/gif.latex?\frac{N^2}{2}) compares and N exchanges to sort an array of length N.
 
 ```
 public class Selection {
